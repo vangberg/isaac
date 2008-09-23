@@ -5,6 +5,9 @@ client = Isaac::Application.new :nick => 'SomeBot',
                    :port => 6667
 
 client.start do
+  on_connect do
+    join "#twittirc"
+  end
   on /^t (.*)/ do
     msg origin, "You said: " + message
   end
