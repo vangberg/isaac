@@ -12,6 +12,6 @@ client.start do
     msg origin, "You said: " + message
   end
   on /quote/ do
-    msg "foo", "this is QOTD"
+    msg origin, "this is QOTD"
   end
 end

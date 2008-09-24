@@ -7,9 +7,9 @@ module Isaac
   class Application
     include IRC
     def initialize(options={})
-      @routes = {}
-      @route_keys = []  # Index of keys, to preserve order.
       @options = options
+      @on_connect = nil
+      @events = []
     end
 
     def start(&block)
@@ -20,23 +20,31 @@ module Isaac
     private
     # Refactor to seperate module?
     def on(match, &block)
-      @routes[match] = block
-      @route_keys << match
+      @events << Event.new(:msg, match, &block)
     end
 
     def on_connect(&block)
+      @on_connect = Event.new(:connect, &block)
     end
 
     def connect
       @irc = TCPSocket.open(@options[:server], @options[:port])
       register
+      @on_connect.invoke
+      @on_connect.commands.each {|command| @irc.puts command}
 
       while line = @irc.gets
         p line
         case line
         when PRIVMSG
-          e = EventContext.new(line, @routes, @route_keys)
-          e.commands.each {|cmd| @irc.puts(cmd)}
+          origin      = $1
+          destination = $2
+          message     = $3
+          if event = @events.detect {|e| message.match(e.match) }
+            # Invoke event with match data
+            event.invoke(:origin => origin, :destination => destination, :message => message)
+            event.commands.each {|command| @irc.puts command}
+          end
         end
       end
     end
@@ -47,24 +55,28 @@ module Isaac
     end
   end
 
-  class EventContext
-    include IRC
-    attr_reader :origin, :destination, :message, :commands
-
-    def initialize(input, routes, route_keys)
+  class Event
+    attr_accessor :match, :block, :type, :commands
+    def initialize(type, match=nil, &block)
+      @type     = type
+      @match    = match
+      @block    = block
       @commands = []
+    end
 
-      if match = input.match(PRIVMSG)
-        @origin       = match[1]
-        @destination  = match[2]
-        @message      = match[3]
-
-        key = route_keys.select {|x| x =~ message}.first
-        instance_eval(&routes[key]) if routes[key].kind_of?(Proc)
+    def invoke(params={})
+      case type
+      when :msg
+        @origin      = params[:origin]
+        @destination = params[:destination]
+        @message     = params[:message]
       end
+
+      instance_eval &@block
     end
 
     private
+    attr_accessor :origin, :destination, :message
     def raw(command)
       @commands << command
     end
