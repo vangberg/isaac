@@ -62,6 +62,13 @@ module Isaac
           event.invoke(:nick => nick, :channel => channel, :message => message)
           event.commands.each {|cmd| @irc.puts cmd}
         end
+      when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
+        error = $1
+        nick = channel = $2
+        if event = @events[:error].detect {|e| error = e.match.to_s }
+          event.invoke(:nick => nick, :channel => channel)
+          event.commands.each {|cmd| @irc.puts cmd}
+        end
       when /^PING (\S+)/
         #TODO not sure this is correect
         @irc.puts "PONG #{$1}" 
