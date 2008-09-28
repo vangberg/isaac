@@ -4,17 +4,9 @@ module Isaac
     @app ||= Application.new
   end
 
-  # Keep constants for regular expressions here. They are ugly and I really
-  # don't like watching at them. Go stuff yrslf!
-  module IRC
-    PRIVMSG = /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
-  end
-
   Config = Struct.new(:nick, :server, :port)
 
   class Application
-    include IRC
-
     def initialize
       @events = Hash.new {|k,v| k[v] = []}
     end
@@ -40,9 +32,8 @@ module Isaac
     def connect
       @irc = TCPSocket.open(@config.server, @config.port)
       register
-      event = @events[:connect].first.invoke
-      event.commands.each {|cmd| @irc.puts cmd} # TODO: This need to be some method on its own.
-      handle
+      @events[:connect].first.invoke.commands.each {|cmd| @irc.puts cmd}
+      handle(line) while line = @irc.gets
     end
 
     def register
@@ -50,24 +41,20 @@ module Isaac
       @irc.puts "USER foobar twitthost twittserv :My Name"
     end
 
-    # TODO: Something is wrong here. Look at all them end-statements at the bottom.
-    def handle
-      while line = @irc.gets
-        p line if ARGV[0] == "-v"
-        case line
-        when PRIVMSG
-          nick        = $1
-          channel     = $2
-          message     = $3
-          type = channel.match(/^#/) ? :channel : :private
-          if event = @events[type].detect {|e| message =~ e.match}
-            event.invoke(:nick => nick, :channel => channel, :message => message)
-            event.commands.each {|cmd| @irc.puts cmd}
-          end
-        when /^PING (\S+)/
-          #TODO not sure this is correect
-          @irc.puts "PONG #{$1}" 
+    def handle(line)
+      case line
+      when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
+        nick        = $1
+        channel     = $2
+        message     = $3
+        type = channel.match(/^#/) ? :channel : :private
+        if event = @events[type].detect {|e| message =~ e.match}
+          event.invoke(:nick => nick, :channel => channel, :message => message)
+          event.commands.each {|cmd| @irc.puts cmd}
         end
+      when /^PING (\S+)/
+        #TODO not sure this is correect
+        @irc.puts "PONG #{$1}" 
       end
     end
   end
@@ -82,7 +69,6 @@ module Isaac
 
     def invoke(params={})
       context = EventContext.new
-      #dirty hack, need to figure out scope stuff
       params[:match] = params[:message].match(@match) if @match && params[:message]
       context.instance_eval do
         @nick         = params[:nick]
@@ -92,7 +78,7 @@ module Isaac
       end
       context.instance_eval(&@block)
       @commands = context.commands
-      return self
+      self
     end
   end
 
