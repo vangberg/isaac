@@ -28,12 +28,21 @@ module Isaac
       @events[type] << Event.new(match, block)
     end
 
+    # TODO Fix this crappy name.
+    def dslify(&block)
+      context = EventContext.new
+      context.instance_eval(&block)
+      context.commands.each {|cmd| @irc.puts cmd}
+    end
+
     private
     def connect
       @irc = TCPSocket.open(@config.server, @config.port)
       register
       @events[:connect].first.invoke.commands.each {|cmd| @irc.puts cmd}
-      handle(line) while line = @irc.gets
+      while line = @irc.gets
+        handle line
+      end
     end
 
     def register
@@ -42,6 +51,8 @@ module Isaac
     end
 
     def handle(line)
+      # TODO this is ugly as well. do something about the args.
+      p line if ARGV[0] == "-v"
       case line
       when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
         nick        = $1
