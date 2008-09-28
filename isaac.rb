@@ -26,6 +26,10 @@ module Isaac
       block.call(@config)
     end
 
+    def helpers(&b)
+      EventContext.class_eval &b
+    end
+
     def on(type, match=nil, &block)
       @events[type] << Event.new(match, block)
     end
@@ -107,7 +111,7 @@ module Isaac
 end
 
 # Assign dialplan methods to current Isaac instance
-%w(config on).each do |method|
+%w(config helpers on).each do |method|
   eval(<<-EOF)
     def #{method}(*args, &block)
       Isaac.app.#{method}(*args, &block)
