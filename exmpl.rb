@@ -1,17 +1,23 @@
 require 'isaac'
 
-client = Isaac::Application.new :nick => 'SomeBot',
-                   :server => 'irc.freenode.net',
-                   :port => 6667
+config do |c|
+  c.nick    = "SomeBot"
+  c.server  = "irc.freenode.net"
+  c.port    = 6667
+end
 
-client.start do
-  on_connect do
-    join "#twittirc"
-  end
-  on /^t (.*)/ do
-    msg origin, "You said: " + message
-  end
-  on /quote/ do
-    msg origin, "this is QOTD"
-  end
+on :connect do
+  join "#twittirc"
+end
+
+on :private, /^t (.*)/ do
+  msg nick, "You said: " + match[1]
+end
+
+on :channel, /quote/ do
+  msg channel, "#{nick}: NO WAY"
+end
+
+on :channel, /quote/ do
+  msg channel, "#{nick}: this is QOTD"
 end
