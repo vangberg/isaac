@@ -4,6 +4,8 @@ module Isaac
     @app ||= Application.new
   end
 
+  # Keep constants for regular expressions here. They are ugly and I really
+  # don't like watching at them. Go stuff yrslf!
   module IRC
     PRIVMSG = /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
   end
@@ -26,8 +28,8 @@ module Isaac
       block.call(@config)
     end
 
-    def helpers(&b)
-      EventContext.class_eval &b
+    def helpers(&block)
+      EventContext.class_eval(&block)
     end
 
     def on(type, match=nil, &block)
@@ -39,7 +41,7 @@ module Isaac
       @irc = TCPSocket.open(@config.server, @config.port)
       register
       event = @events[:connect].first.invoke
-      event.commands.each {|cmd| @irc.puts cmd} # This need to be some method on its own.
+      event.commands.each {|cmd| @irc.puts cmd} # TODO: This need to be some method on its own.
       handle
     end
 
@@ -48,6 +50,7 @@ module Isaac
       @irc.puts "USER foobar twitthost twittserv :My Name"
     end
 
+    # TODO: Something is wrong here. Look at all them end-statements at the bottom.
     def handle
       while line = @irc.gets
         p line
@@ -84,7 +87,7 @@ module Isaac
         @message      = params[:message]
         @match        = params[:match]
       end
-      context.instance_eval &@block
+      context.instance_eval(&@block)
       @commands = context.commands
       return self
     end
@@ -104,8 +107,8 @@ module Isaac
       raw("PRIVMSG #{recipient} :#{text}")
     end
 
-    def join(channel)
-      raw("JOIN #{channel}")
+    def join(*channels)
+      channels.each {|channel| raw("JOIN #{channel}")}
     end
   end
 end
