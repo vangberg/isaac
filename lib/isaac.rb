@@ -53,7 +53,7 @@ module Isaac
     # TODO: Something is wrong here. Look at all them end-statements at the bottom.
     def handle
       while line = @irc.gets
-        p line
+        p line if ARGV[0] == "-v"
         case line
         when PRIVMSG
           nick        = $1
@@ -65,7 +65,8 @@ module Isaac
             event.commands.each {|cmd| @irc.puts cmd}
           end
         when /^PING (\S+)/
-          @irc.puts "PONG #{$1}"
+          #TODO not sure this is correect
+          @irc.puts "PONG #{$1}" 
         end
       end
     end
