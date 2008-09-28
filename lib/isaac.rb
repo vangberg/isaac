@@ -29,7 +29,7 @@ module Isaac
     end
 
     # TODO Fix this crappy name.
-    def dslify(params, &block)
+    def dslify(params={}, &block)
       event = Event.new(:dsl, block)
       event.invoke(params).commands.each {|cmd| @irc.puts cmd}
     end

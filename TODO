@@ -1,0 +1,3 @@
+- commands as topic, kick, part, names etc implemented
+- default value for @port ?
+- handling of error messages, e.g. no such nick/channel
