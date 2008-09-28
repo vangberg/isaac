@@ -64,6 +64,8 @@ module Isaac
             event.invoke(:nick => nick, :channel => channel, :message => message)
             event.commands.each {|cmd| @irc.puts cmd}
           end
+        when /^PING (\S+)/
+          @irc.puts "PONG #{$1}"
         end
       end
     end
