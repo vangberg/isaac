@@ -20,6 +20,4 @@ describe Application do
     context.rain_check("date")
     context.commands.should eql(["PRIVMSG miss_teen :can i take a rain check on the date?"])
   end
-
-
 end

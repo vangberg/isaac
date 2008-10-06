@@ -1,7 +1,7 @@
 require '../lib/isaac.rb'
 
 config do |c|
-  c.nick    = "twittirc2"
+  c.nick    = "echo_bot"
   c.server  = "irc.freenode.net"
   c.port    = 6667
 end
@@ -11,5 +11,5 @@ on :connect do
 end
 
 on :channel, /.*/ do
-  msg channel, "#{nick} said: #{message}"
+  msg channel, message
 end

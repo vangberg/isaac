@@ -14,7 +14,7 @@ module Isaac
     app.execute(&block)
   end
 
-  Config = Struct.new(:nick, :server, :port)
+  Config = Struct.new(:nick, :server, :port, :username, :realname)
 
   # These are top level methods you use to construct your bot.
   class Application
@@ -29,12 +29,14 @@ module Isaac
 
     # Configure the bot:
     #   config do |c|
-    #     c.server  = "irc.freenode.net"
-    #     c.nick    = "AwesomeBot"
-    #     c.port    = 6667
+    #     c.server    = "irc.freenode.net"
+    #     c.nick      = "AwesomeBot"
+    #     c.port      = 6667
+    #     c.realname  = "James Dean"
+    #     c.username  = "jdean"
     #   end
     def config(&block)
-      @config = Config.new
+      @config = Config.new('isaac_bot', 'irc.freenode.net', 6667, 'isaac', 'isaac')
       block.call(@config)
       @config
     end
@@ -51,7 +53,7 @@ module Isaac
     #       join "#awesome_channel", "#lee_marvin_fans"
     #     end
     # * Respond to private messages matching a given regular expression.
-    #     on :privage, /^echo (.*)/ do
+    #     on :private, /^echo (.*)/ do
     #       msg nick, "You said '#{match[1]}!"
     #     end
     # * Respond to messages matching a given regular expression send to a channel.
@@ -80,87 +82,87 @@ module Isaac
       @irc = TCPSocket.open(@config.server, @config.port)
       @queue = Queue.new(@irc)
       @queue << "NICK #{@config.nick}"
-      @queue << "USER foobar twitthost twittserv :My Name"
-      @queue << @events[:connect].first.invoke if @events[:connect].first
-      while line = @irc.gets
-        handle line
-      end
-    end
-
-    # This is one hell of a nasty method. Something should be done, I suppose.
-    def handle(line)
-      p line if ARGV[0] == "-v" # TODO this is ugly as well. do something about the args.
-
-      case line
-      when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
-        nick        = $1
-        channel     = $2
-        message     = $3
-        type = channel.match(/^#/) ? :channel : :private
-        if event = event(type, message)
-          @queue << event.invoke(:nick => nick, :channel => channel, :message => message)
+      @queue << "USER #{@config.username} foobar foobar :#{@config.realname}"
+        @queue << @events[:connect].first.invoke if @events[:connect].first
+        while line = @irc.gets
+          handle line
         end
-      when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
-        error = $1
-        nick = channel = $2
-        if event = event(:error, error)
-          @queue << event.invoke(:nick => nick, :channel => channel)
-        end
-      when /^PING (\S+)/
-        #TODO not sure this is correct. Damned RFC.
-        @queue << "PONG #{$1}" 
-      when /^:\S+ PONG \S+ :excess/
-        @queue.lock = false
       end
-    end
-  end
 
-  class Queue #:nodoc:
-    attr_accessor :lock
-    def initialize(socket)
-      @socket     = socket
-      @queue      = []
-      @transfered = 0
-      @lock       = false
-      transmit
-    end
+      # This is one hell of a nasty method. Something should be done, I suppose.
+      def handle(line)
+        p line if ARGV[0] == "-v" # TODO this is ugly as well. do something about the args.
 
-    # I luvz Rubyz
-    def << (msg)
-      @queue << msg
-    end
-
-    # To prevent excess flood no more than 1472 bytes will be sent to the
-    # server. When that limit is reached, @lock = true and the server will be
-    # PINGed. @lock will be true until a PONG is received (Application#handle).
-    def transmit
-      Thread.start { loop {
-        unless @lock || @queue.empty?
-          msg = @queue.shift
-          if (@transfered + msg.size) > 1472
-            # No honestly, :excess. The RFC is not too clear on this subject TODO
-            @socket.puts "PING :excess"
-            @lock = true
-            @transfered = 0
-          else
-            @socket.puts msg
-            @transfered += msg.size
+        case line
+        when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
+          nick        = $1
+          channel     = $2
+          message     = $3
+          type = channel.match(/^#/) ? :channel : :private
+          if event = event(type, message)
+            @queue << event.invoke(:nick => nick, :channel => channel, :message => message)
           end
+        when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
+          error = $1
+          nick = channel = $2
+          if event = event(:error, error)
+            @queue << event.invoke(:nick => nick, :channel => channel)
+          end
+        when /^PING (\S+)/
+          #TODO not sure this is correct. Damned RFC.
+          @queue << "PONG #{$1}" 
+        when /^:\S+ PONG \S+ :excess/
+          @queue.lock = false
         end
-        sleep 0.1
-      }}
-    end
-  end
-
-  class Event #:nodoc:
-    attr_accessor :match, :block
-    def initialize(match, block)
-      @match    = match
-      @block    = block
+      end
     end
 
-    # Execute event in the context of EventContext.
-    def invoke(params={})
+    class Queue #:nodoc:
+      attr_accessor :lock
+      def initialize(socket)
+        @socket     = socket
+        @queue      = []
+        @transfered = 0
+        @lock       = false
+        transmit
+      end
+
+      # I luvz Rubyz
+      def << (msg)
+        @queue << msg
+      end
+
+      # To prevent excess flood no more than 1472 bytes will be sent to the
+      # server. When that limit is reached, @lock = true and the server will be
+      # PINGed. @lock will be true until a PONG is received (Application#handle).
+      def transmit
+        Thread.start { loop {
+          unless @lock || @queue.empty?
+            msg = @queue.shift
+            if (@transfered + msg.size) > 1472
+              # No honestly, :excess. The RFC is not too clear on this subject TODO
+              @socket.puts "PING :excess"
+              @lock = true
+              @transfered = 0
+            else
+              @socket.puts msg
+              @transfered += msg.size
+            end
+          end
+          sleep 0.1
+        }}
+      end
+    end
+
+    class Event #:nodoc:
+      attr_accessor :match, :block
+      def initialize(match, block)
+        @match    = match
+        @block    = block
+      end
+
+      # Execute event in the context of EventContext.
+      def invoke(params={})
       context = EventContext.new
       params[:match] = params[:message].match(@match) if @match && params[:message]
       context.instance_eval do

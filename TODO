@@ -1,3 +1,4 @@
-- default value for @port ?
-- mode() command, yes.
-- handle disconnects..
+- Handle disconnects, on :disconnect ?
+- mode() for setting nick/channel modes
+- a bunch of IRC commands. invite, ban etc.
+- More specs

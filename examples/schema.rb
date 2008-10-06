@@ -4,6 +4,8 @@ config do |c|
   c.nick    = "SomeBot"
   c.server  = "irc.freenode.net"
   c.port    = 6667
+  c.username = 'ihayes'
+  c.realname = 'Isaac Hayes'
 end
 
 helpers do

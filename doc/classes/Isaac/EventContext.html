@@ -132,7 +132,7 @@
                   <a class='source-toggle' href='#' onclick="toggleCode('M000003-source'); return false">
                     [show source]
                   </a>
-                  <pre id='M000003-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 152</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>&#x000A;      <span class="ruby-ivar">@commands</span> = []&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                  <pre id='M000003-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 179</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">initialize</span>&#x000A;      <span class="ruby-ivar">@commands</span> = []&#x000A;    <span class="ruby-keyword kw">end</span></pre>
                 </div>
               </div>
               <h3>Public instance methods</h3>
@@ -152,14 +152,14 @@
                   <a class='source-toggle' href='#' onclick="toggleCode('M000006-source'); return false">
                     [show source]
                   </a>
-                  <pre id='M000006-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 169</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">join</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">channels</span>)&#x000A;      <span class="ruby-identifier">channels</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">channel</span><span class="ruby-operator">|</span> <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;JOIN #{channel}&quot;</span>)}&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                  <pre id='M000006-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 196</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">join</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">channels</span>)&#x000A;      <span class="ruby-identifier">channels</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">channel</span><span class="ruby-operator">|</span> <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;JOIN #{channel}&quot;</span>)}&#x000A;    <span class="ruby-keyword kw">end</span></pre>
                 </div>
               </div>
               <div class='public-instance method' id='method-M000008'>
                 <a name='M000008'>      </a>
                 <div class='synopsis'>
                   <span class='name'>kick</span>
-                  <span class='arguments'>(channel, nick, comment=&quot;&quot;)</span>
+                  <span class='arguments'>(channel, nick, comment=nil)</span>
                 </div>
                 <div class='description'>
                   <p>
@@ -170,7 +170,7 @@
                   <a class='source-toggle' href='#' onclick="toggleCode('M000008-source'); return false">
                     [show source]
                   </a>
-                  <pre id='M000008-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 181</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">kick</span>(<span class="ruby-identifier">channel</span>, <span class="ruby-identifier">nick</span>, <span class="ruby-identifier">comment</span>=<span class="ruby-value str">&quot;&quot;</span>)&#x000A;      <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;KICK #{channel} #{nick} :#{comment}&quot;</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                  <pre id='M000008-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 208</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">kick</span>(<span class="ruby-identifier">channel</span>, <span class="ruby-identifier">nick</span>, <span class="ruby-identifier">comment</span>=<span class="ruby-keyword kw">nil</span>)&#x000A;      <span class="ruby-identifier">comment</span> = <span class="ruby-node">&quot; :#{comment}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">comment</span>&#x000A;      <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;KICK #{channel} #{nick}#{comment}&quot;</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
                 </div>
               </div>
               <div class='public-instance method' id='method-M000005'>
@@ -188,7 +188,7 @@
                   <a class='source-toggle' href='#' onclick="toggleCode('M000005-source'); return false">
                     [show source]
                   </a>
-                  <pre id='M000005-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 162</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">msg</span>(<span class="ruby-identifier">recipient</span>, <span class="ruby-identifier">text</span>)&#x000A;      <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;PRIVMSG #{recipient} :#{text}&quot;</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                  <pre id='M000005-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 189</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">msg</span>(<span class="ruby-identifier">recipient</span>, <span class="ruby-identifier">text</span>)&#x000A;      <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;PRIVMSG #{recipient} :#{text}&quot;</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
                 </div>
               </div>
               <div class='public-instance method' id='method-M000007'>
@@ -207,7 +207,7 @@
                   <a class='source-toggle' href='#' onclick="toggleCode('M000007-source'); return false">
                     [show source]
                   </a>
-                  <pre id='M000007-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 176</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">part</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">channels</span>)&#x000A;      <span class="ruby-identifier">channels</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">channel</span><span class="ruby-operator">|</span> <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;PART #{channel}&quot;</span>)}&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                  <pre id='M000007-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 203</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">part</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">channels</span>)&#x000A;      <span class="ruby-identifier">channels</span>.<span class="ruby-identifier">each</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">channel</span><span class="ruby-operator">|</span> <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;PART #{channel}&quot;</span>)}&#x000A;    <span class="ruby-keyword kw">end</span></pre>
                 </div>
               </div>
               <div class='public-instance method' id='method-M000004'>
@@ -225,7 +225,7 @@
                   <a class='source-toggle' href='#' onclick="toggleCode('M000004-source'); return false">
                     [show source]
                   </a>
-                  <pre id='M000004-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 157</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">raw</span>(<span class="ruby-identifier">command</span>)&#x000A;      <span class="ruby-ivar">@commands</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">command</span>&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                  <pre id='M000004-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 184</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">raw</span>(<span class="ruby-identifier">command</span>)&#x000A;      <span class="ruby-ivar">@commands</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">command</span>&#x000A;    <span class="ruby-keyword kw">end</span></pre>
                 </div>
               </div>
               <div class='public-instance method' id='method-M000009'>
@@ -243,7 +243,7 @@
                   <a class='source-toggle' href='#' onclick="toggleCode('M000009-source'); return false">
                     [show source]
                   </a>
-                  <pre id='M000009-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 186</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">topic</span>(<span class="ruby-identifier">channel</span>, <span class="ruby-identifier">topic</span>)&#x000A;      <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;KICK #{channel} #{topic}&quot;</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                  <pre id='M000009-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 214</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">topic</span>(<span class="ruby-identifier">channel</span>, <span class="ruby-identifier">topic</span>)&#x000A;      <span class="ruby-identifier">raw</span>(<span class="ruby-node">&quot;TOPIC #{channel} :#{topic}&quot;</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
                 </div>
               </div>
             </div>

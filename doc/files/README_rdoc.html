@@ -31,7 +31,7 @@
         </div>
         <div class='last-update'>
           Last Update:
-          <span class='datetime'>Mon Oct 06 15:10:22 +0200 2008</span>
+          <span class='datetime'>Mon Oct 06 19:27:01 +0200 2008</span>
         </div>
       </div>
       <div id='content'>
@@ -45,27 +45,76 @@
             href="../classes/Isaac.html">Isaac</a> is not for you. It will be. At some
             point. But you shall be welcome to try it out and help me extend and
             beautify it. Be aware, the code is not stellar by any measure, most likely
-            it is very crude. Oh, and a lot of concepts were borrowed from Sinatra (<a
+            it is very crude and a large portion of the IRC standard has not been
+            implemented, simply because I haven&#8217;t needed it yet. Oh, and a lot of
+            concepts were borrowed from Sinatra (<a
             href="http://sinatrarb.com">sinatrarb.com</a>). Thanks.
             </p>
             <h2>Getting started</h2>
             <p>
             An Isaac-bot needs a few basics:
             </p>
-            <pre>&#x000A;  $ cat bot.rb&#x000A;  require 'isaac'&#x000A;  config do |c|&#x000A;    c.nick    = &quot;AwesomeBot&quot;&#x000A;    c.server  = &quot;irc.freenode.net&quot;&#x000A;    c.port    = 6667&#x000A;  end</pre>
+            <pre>&#x000A;  require 'isaac'&#x000A;  config do |c|&#x000A;    c.nick    = &quot;AwesomeBot&quot;&#x000A;    c.server  = &quot;irc.freenode.net&quot;&#x000A;    c.port    = 6667&#x000A;  end</pre>
             <p>
             That&#8217;s it. Run <tt>ruby bot.rb</tt> and it will connect to the
             specified server.
             </p>
             <h3>Connecting</h3>
+            <p>
+            After the bot has connected to the IRC server you might want to join some
+            channels:
+            </p>
+            <pre>&#x000A;  on :connect do&#x000A;    join &quot;#awesome_channel&quot;, &quot;#WesternBar&quot;&#x000A;  end</pre>
             <h3>Responding to messages</h3>
             <p>
-            An <a href="../classes/Isaac.html">Isaac</a> bot is basically a bunch of
-            on()-events that react on certain messages send as private messages or to
-            channels that the bot has joined. The following will repeat everything
-            being sent as a private message:
+            Joining a channel and sitting idle is not much fun. Let&#8217;s repeat
+            everything being said in these channels:
             </p>
-            <pre>&#x000A;  on :private, /.*/ do&#x000A;    msg nick, &quot;You said: #{message}&quot;&#x000A;  end</pre>
+            <pre>&#x000A;  on :channel, /.*/ do&#x000A;    msg channel, message&#x000A;  end</pre>
+            <p>
+            Notice the <tt>channel</tt> and <tt>message</tt> variables. Additionally
+            <tt>nick</tt> and <tt>match</tt> is available for channel-events.
+            <tt>nick</tt> being the sender of the message, <tt>match</tt> being a
+            MatchData object returned by the regular expression you specified:
+            </p>
+            <pre>&#x000A;  on :channel, /^quote this: (.*)/ do&#x000A;    msg channel, &quot;Quote: '#{match[1]}' by #{nick}&quot;&#x000A;  end</pre>
+            <p>
+            If you want to match private messages use the +on :private+ event:
+            </p>
+            <pre>&#x000A;  on :private, /^login (\S+) (\S+)/ do&#x000A;    username = match[1]&#x000A;    password = match[2]&#x000A;    # do something to authorize or whatevz.&#x000A;    msg nick, &quot;Login successful!&quot;&#x000A;  end</pre>
+            <h3>Defining helpers</h3>
+            <p>
+            Helpers should not be defined in the top level, but instead using the
+            <tt>helpers</tt>-constructor:
+            </p>
+            <pre>&#x000A;  helpers do&#x000A;    def rain_check(meeting)&#x000A;      msg nick, &quot;Can I have a rain check on the #{meeting}?&quot;&#x000A;    end&#x000A;  end&#x000A;&#x000A;  on :private, /date/ do&#x000A;    rain_check(&quot;romantic date&quot;)&#x000A;  end</pre>
+            <h3>Errors, errors, errors</h3>
+            <p>
+            Errors, as specified by RFC 1459, can be reacted upon as well. If you e.g.
+            try to send a message to a non-existant nick you will get error 401:
+            &#8220;No such nick/channel&#8220;.
+            </p>
+            <pre>&#x000A;  on :error, 401 do&#x000A;    # Do something.&#x000A;  end</pre>
+            <p>
+            Available variables: <tt>nick</tt> and <tt>channel</tt>.
+            </p>
+            <h3>Send commands from outside an event</h3>
+            <p>
+            You might want to send messages, join channels etc. without it strictly
+            being the result of an on()-event, e.g. send a message every time a RSS
+            feed is updated or whatever. You can use <tt><a
+            href="../classes/Isaac.html#M000002">Isaac.execute</a></tt> for that, and
+            all your normal commands, <tt>msg</tt>, <tt>join</tt>, <tt>topic</tt> etc.
+            will be available:
+            </p>
+            <pre>&#x000A;  class K&#x000A;    def smoke(brand)&#x000A;      Isaac.execute { msg &quot;harryjr&quot;, &quot;you should smoke #{brand} cigarettes&quot; }&#x000A;    end&#x000A;  end&#x000A;&#x000A;  on :connect do&#x000A;    k = K.new&#x000A;    k.smoke(&quot;Lucky Strike&quot;)&#x000A;  end</pre>
+            <h2>Contribute</h2>
+            <p>
+            The source is hosted at GitHub: <a
+            href="http://github.com/ichverste/isaac">github.com/ichverste/isaac</a>
+            </p>
+            <h2>License</h2>
+            <pre>&#x000A;  ------------------------------------------------------------------------------&#x000A;  &quot;THE BEER-WARE LICENSE&quot; (Revision 42):&#x000A;  &lt;ichverstehe@gmail.com&gt; wrote this file. As long as you retain this notice you&#x000A;  can do whatever you want with this stuff. If we meet some day, and you think&#x000A;  this stuff is worth it, you can buy me a beer in return.&#x000A;  ------------------------------------------------------------------------------</pre>
           </div>
           <div id='section'>
           </div>
