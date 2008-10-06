@@ -1,6 +1,6 @@
 require 'lib/isaac.rb'
 
-class K
+class K #:nodoc:
   def smoke(brand)
     Isaac.execute { msg "harryjr", "you should smoke #{brand} cigarettes" }
   end

@@ -76,7 +76,7 @@ You might want to send messages, join channels etc. without it strictly being th
   end
 
 == Contribute
-The source is hosted at GitHub: http://github.com/ichverste/isaac
+The source is hosted at GitHub: http://github.com/ichverstehe/isaac
 
 == License
   ------------------------------------------------------------------------------
