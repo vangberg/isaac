@@ -1,0 +1,12 @@
+= Isaac - the smallish DSL for writing IRC bots
+You want to create an IRC bot quickly, but don't care about registering, ping-pong messages, worrying about excess flood and fighting with nasty regular expressions? Then Isaac is not for you. It will be. At some point. But you shall be welcome to try it out and help me extend and beautify it. Be aware, the code is not stellar by any measure, most likely it is very crude. Oh, and a lot of concepts were borrowed from Sinatra (http://sinatrarb.com). Thanks.
+
+== Getting started
+An Isaac-bot needs a few basics:
+  require 'isaac'
+  config do |c|
+    c.nick    = "AwesomeBot"
+    c.server  = "irc.freenode.net"
+    c.port    = 6667
+  end
+

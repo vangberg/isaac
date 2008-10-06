@@ -1,10 +1,8 @@
 require 'lib/isaac.rb'
 
 class K
-  def initialize
-    Isaac.app.dslify do
-      msg "harryjr", "foobarnar"
-    end
+  def smoke(brand)
+    Isaac.execute { msg "harryjr", "you should smoke #{brand} cigarettes" }
   end
 end
 
@@ -16,4 +14,5 @@ end
 
 on :connect do
   k = K.new
+  k.smoke("Lucky Strike")
 end

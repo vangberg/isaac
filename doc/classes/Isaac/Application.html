@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang='en'>
+  <head>
+    <title>Class: Isaac::Application [RDoc Documentation]</title>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+    <link href='../.././rdoc-style.css' media='screen' rel='stylesheet' type='text/css' />
+    <script type='text/javascript'>
+      //<![CDATA[
+        function popupCode(url) {
+          window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+        }
+        
+        function toggleCode(id) {
+          var code = document.getElementById(id)
+        
+          code.style.display = code.style.display != 'block' ? 'block' : 'none'
+          return true
+        }
+        
+        // Make codeblocks hidden by default
+        document.writeln('<' + 'style type="text/css">.method .source pre { display: none }<\/style>')
+      //]]>
+    </script>
+  </head>
+  <body class='page'>
+    <div class='class' id='wrapper'>
+      <div class='header'>
+        <h1 class='name'>
+          <span class='type'>Class</span>
+          Isaac::Application
+        </h1>
+        <ol class='paths'>
+          <li>
+            <a href="../../files/lib/isaac_rb.html">lib/isaac.rb</a>
+          </li>
+        </ol>
+        <div class='parent'>
+          Parent:
+          <strong>Object</strong>
+        </div>
+      </div>
+      <div id='content'>
+        <div id='text'>
+          <div id='description'>
+            <p>
+            These are top level methods you use to construct your bot.
+            </p>
+          </div>
+          <div id='method-list'>
+            <h2>Methods</h2>
+            <h3>public instance</h3>
+            <ol>
+              <li><a href="#M000007">config</a></li>
+              <li><a href="#M000008">helpers</a></li>
+              <li><a href="#M000009">on</a></li>
+            </ol>
+          </div>
+          <div id='section'>
+            <div id='methods'>
+              <h3>Public instance methods</h3>
+              <div class='public-instance method' id='method-M000007'>
+                <a name='M000007'>      </a>
+                <div class='synopsis'>
+                  <span class='name'>config</span>
+                  <span class='arguments'>(&amp;block)</span>
+                </div>
+                <div class='description'>
+                  <p>
+                  Configure the bot:
+                  </p>
+                  <pre>&#x000A;  config do |c|&#x000A;    c.server  = &quot;irc.freenode.net&quot;&#x000A;    c.nick    = &quot;AwesomeBot&quot;&#x000A;    c.port    = 6667&#x000A;  end</pre>
+                </div>
+                <div class='source'>
+                  <a class='source-toggle' href='#' onclick="toggleCode('M000007-source'); return false">
+                    [show source]
+                  </a>
+                  <pre id='M000007-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 36</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">config</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)&#x000A;      <span class="ruby-ivar">@config</span> = <span class="ruby-constant">Config</span>.<span class="ruby-identifier">new</span>&#x000A;      <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>(<span class="ruby-ivar">@config</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                </div>
+              </div>
+              <div class='public-instance method' id='method-M000008'>
+                <a name='M000008'>      </a>
+                <div class='synopsis'>
+                  <span class='name'>helpers</span>
+                  <span class='arguments'>(&amp;block)</span>
+                </div>
+                <div class='description'>
+                  <p>
+                  Methods defined inside the helpers-block will be available to on()-events
+                  at execution time.
+                  </p>
+                </div>
+                <div class='source'>
+                  <a class='source-toggle' href='#' onclick="toggleCode('M000008-source'); return false">
+                    [show source]
+                  </a>
+                  <pre id='M000008-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 42</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">helpers</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)&#x000A;      <span class="ruby-constant">EventContext</span>.<span class="ruby-identifier">class_eval</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                </div>
+              </div>
+              <div class='public-instance method' id='method-M000009'>
+                <a name='M000009'>      </a>
+                <div class='synopsis'>
+                  <span class='name'>on</span>
+                  <span class='arguments'>(type, match=nil, &amp;block)</span>
+                </div>
+                <div class='description'>
+                  <p>
+                  on()-events responds to certain actions. Depending on <tt>type</tt> certain
+                  local variables are available: <tt>nick</tt>, <tt>channel</tt>,
+                  <tt>message</tt> and in particular <tt>match</tt>, which contains a
+                  MatchData object returned by the given regular expression.
+                  </p>
+                  <ul>
+                  <li>Do something after connection has been established, e.g. join channels.
+                  
+                  <pre>&#x000A;  on :connect do&#x000A;    join &quot;#awesome_channel&quot;, &quot;#lee_marvin_fans&quot;&#x000A;  end</pre>
+                  </li>
+                  <li>Respond to private messages matching a given regular expression.
+                  
+                  <pre>&#x000A;  on :privage, /^echo (.*)/ do&#x000A;    msg nick, &quot;You said '#{match[1]}!&quot;&#x000A;  end</pre>
+                  </li>
+                  <li>Respond to messages matching a given regular expression send to a channel.
+                  
+                  <pre>&#x000A;  on :channel, /quote/ do&#x000A;    msg channel, &quot;#{nick} requested a quote: 'Smoking, a subtle form a suicide.' - Vonnegut&quot;&#x000A;  end</pre>
+                  </li>
+                  <li>Respond to error codes, according to the RFC.
+                  
+                  <pre>&#x000A;  on :error, 401 do&#x000A;    # Execute this if you try to send a message to a non-existing nick/channel.&#x000A;  end</pre>
+                  </li>
+                  </ul>
+                </div>
+                <div class='source'>
+                  <a class='source-toggle' href='#' onclick="toggleCode('M000009-source'); return false">
+                    [show source]
+                  </a>
+                  <pre id='M000009-source'><span class="ruby-comment cmt"># File lib/isaac.rb, line 64</span>&#x000A;    <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">on</span>(<span class="ruby-identifier">type</span>, <span class="ruby-identifier">match</span>=<span class="ruby-keyword kw">nil</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)&#x000A;      <span class="ruby-ivar">@events</span>[<span class="ruby-identifier">type</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Event</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">match</span>, <span class="ruby-identifier">block</span>)&#x000A;    <span class="ruby-keyword kw">end</span></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id='footer-push'></div>
+    </div>
+    <div id='footer'>
+      <a href="http://github.com/mislav/hanna"><strong>Hanna</strong> RDoc template</a>
+      hand-crafted by
+      <strong><a href="http://mislav.caboo.se/">Mislav</a></strong>
+    </div>
+  </body>
+</html>

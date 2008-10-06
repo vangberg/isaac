@@ -1,3 +1,2 @@
-- commands as topic, kick, part, names etc implemented
+- more EventContext methods: kick, part, topic
 - default value for @port ?
-- handling of error messages, e.g. no such nick/channel
