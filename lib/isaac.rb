@@ -72,12 +72,15 @@ module Isaac
     end
 
     private
+    def event(type, matcher)
+      @events[type].detect {|e| matcher =~ e.match}
+    end
+
     def connect
       @irc = TCPSocket.open(@config.server, @config.port)
       @queue = Queue.new(@irc)
       @queue << "NICK #{@config.nick}"
       @queue << "USER foobar twitthost twittserv :My Name"
-      # Stupid line. Invoke on :connect, if it exists. Etc. etc.
       @queue << @events[:connect].first.invoke if @events[:connect].first
       while line = @irc.gets
         handle line
@@ -94,13 +97,13 @@ module Isaac
         channel     = $2
         message     = $3
         type = channel.match(/^#/) ? :channel : :private
-        if event = @events[type].detect {|e| message =~ e.match}
+        if event = event(type, message)
           @queue << event.invoke(:nick => nick, :channel => channel, :message => message)
         end
       when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
         error = $1
         nick = channel = $2
-        if event = @events[:error].detect {|e| error == e.match.to_s }
+        if event = event(:error, error)
           @queue << event.invoke(:nick => nick, :channel => channel)
         end
       when /^PING (\S+)/
