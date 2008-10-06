@@ -81,15 +81,19 @@ module Isaac
     end
 
     def connect
-      puts "Connecting to #{@config.server} at port #{@config.port}"
-      @irc = TCPSocket.open(@config.server, @config.port)
-      puts "Connection established."
-      @queue = Queue.new(@irc)
-      @queue << "NICK #{@config.nick}"
-      @queue << "USER #{@config.username} foobar foobar :#{@config.realname}"
-      @queue << @events[:connect].first.invoke if @events[:connect].first
-      while line = @irc.gets
-        handle line
+      begin
+        puts "Connecting to #{@config.server} at port #{@config.port}"
+        @irc = TCPSocket.open(@config.server, @config.port)
+        puts "Connection established."
+        @queue = Queue.new(@irc)
+        @queue << "NICK #{@config.nick}"
+        @queue << "USER #{@config.username} foobar foobar :#{@config.realname}"
+        @queue << @events[:connect].first.invoke if @events[:connect].first
+        while line = @irc.gets
+          handle line
+        end
+      rescue Interrupt => e
+        puts "Disconnected! An error occurred: #{e.inspect}"
       end
     end
 
