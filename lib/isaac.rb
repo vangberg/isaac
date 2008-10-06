@@ -227,7 +227,7 @@ module Isaac
   end
 end
 
-# Assign dialplan methods to current Isaac instance
+# Assign methods to current Isaac instance
 %w(config helpers on).each do |method|
   eval(<<-EOF)
     def #{method}(*args, &block)
