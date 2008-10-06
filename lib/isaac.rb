@@ -9,6 +9,7 @@ module Isaac
   class Application
     def initialize
       @events = Hash.new {|k,v| k[v] = []}
+      @transfered = 0
     end
 
     def start
@@ -31,22 +32,33 @@ module Isaac
     # TODO Fix this crappy name.
     def dslify(params={}, &block)
       event = Event.new(:dsl, block)
-      event.invoke(params).commands.each {|cmd| @irc.puts cmd}
+      event.invoke(params).commands.each {|cmd| iputs cmd}
     end
 
     private
+    # Write to IRC. Counts amount of transfered data, pings if necessary, to 
+    # avoid excess flood. Yet another crappy name.
+    def iputs(msg)
+      if (@transfered + msg.size) > 1472
+        @irc.puts "PING :twittirc"
+        @transfered = 0
+      end
+      @irc.puts msg
+      @transfered += msg.size
+    end
+
     def connect
       @irc = TCPSocket.open(@config.server, @config.port)
       register
-      @events[:connect].first.invoke.commands.each {|cmd| @irc.puts cmd}
+      @events[:connect].first.invoke.commands.each {|cmd| iputs cmd}
       while line = @irc.gets
         handle line
       end
     end
 
     def register
-      @irc.puts "NICK #{@config.nick}"
-      @irc.puts "USER foobar twitthost twittserv :My Name"
+      iputs "NICK #{@config.nick}"
+      iputs "USER foobar twitthost twittserv :My Name"
     end
 
     def handle(line)
@@ -60,18 +72,18 @@ module Isaac
         type = channel.match(/^#/) ? :channel : :private
         if event = @events[type].detect {|e| message =~ e.match}
           event.invoke(:nick => nick, :channel => channel, :message => message)
-          event.commands.each {|cmd| @irc.puts cmd}
+          event.commands.each {|cmd| iputs cmd}
         end
       when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
         error = $1
         nick = channel = $2
-        if event = @events[:error].detect {|e| error = e.match.to_s }
+        if event = @events[:error].detect {|e| error == e.match.to_s }
           event.invoke(:nick => nick, :channel => channel)
-          event.commands.each {|cmd| @irc.puts cmd}
+          event.commands.each {|cmd| iputs cmd}
         end
       when /^PING (\S+)/
         #TODO not sure this is correect
-        @irc.puts "PONG #{$1}" 
+        iputs "PONG #{$1}" 
       end
     end
   end
