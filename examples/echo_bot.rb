@@ -1,7 +1,7 @@
-require 'lib/isaac.rb'
+require '../lib/isaac.rb'
 
 config do |c|
-  c.nick    = "The_Echo_Bot"
+  c.nick    = "twittirc2"
   c.server  = "irc.freenode.net"
   c.port    = 6667
 end

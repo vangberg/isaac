@@ -20,10 +20,9 @@ module Isaac
   class Application
     def initialize #:nodoc:
       @events = Hash.new {|k,v| k[v] = []}
-      @transfered = 0
-      @lock = false
     end
 
+    # This is plain stupid. Might be useful for logging or something later on.
     def start #:nodoc:
       connect
     end
@@ -76,22 +75,19 @@ module Isaac
     def connect
       @irc = TCPSocket.open(@config.server, @config.port)
       @queue = Queue.new(@irc)
-      register
-      @events[:connect].first.invoke.commands.each {|cmd| @queue << cmd} if @events[:connect].first
+      @queue << "NICK #{@config.nick}"
+      @queue << "USER foobar twitthost twittserv :My Name"
+      # Stupid line. Invoke on :connect, if it exists. Etc. etc.
+      @queue << @events[:connect].first.invoke if @events[:connect].first
       while line = @irc.gets
         handle line
       end
     end
 
-    def register
-      @queue << "NICK #{@config.nick}"
-      @queue << "USER foobar twitthost twittserv :My Name"
-    end
-
+    # This is one hell of a nasty method. Something should be done, I suppose.
     def handle(line)
       p line if ARGV[0] == "-v" # TODO this is ugly as well. do something about the args.
 
-      # Could this be DRY'ed?
       case line
       when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
         nick        = $1
@@ -99,18 +95,16 @@ module Isaac
         message     = $3
         type = channel.match(/^#/) ? :channel : :private
         if event = @events[type].detect {|e| message =~ e.match}
-          event.invoke(:nick => nick, :channel => channel, :message => message)
-          event.commands.each {|cmd| @queue << cmd}
+          @queue << event.invoke(:nick => nick, :channel => channel, :message => message)
         end
       when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
         error = $1
         nick = channel = $2
         if event = @events[:error].detect {|e| error == e.match.to_s }
-          event.invoke(:nick => nick, :channel => channel)
-          event.commands.each {|cmd| @queue << cmd}
+          @queue << event.invoke(:nick => nick, :channel => channel)
         end
       when /^PING (\S+)/
-        #TODO not sure this is correect
+        #TODO not sure this is correct. Damned RFC.
         @queue << "PONG #{$1}" 
       when /^:\S+ PONG \S+ :excess/
         @queue.lock = false
@@ -118,7 +112,7 @@ module Isaac
     end
   end
 
-  class Queue
+  class Queue #:nodoc:
     attr_accessor :lock
     def initialize(socket)
       @socket     = socket
@@ -128,39 +122,41 @@ module Isaac
       transmit
     end
 
+    # I luvz Rubyz
     def << (msg)
       @queue << msg
     end
 
+    # To prevent excess flood no more than 1472 bytes will be sent to the
+    # server. When that limit is reached, @lock = true and the server will be
+    # PINGed. @lock will be true until a PONG is received (Application#handle).
     def transmit
-      Thread.start do
-        loop do
-          unless @lock || @queue.empty?
-            p ">>>>> #{@transfered}"
-            msg = @queue.shift
-            if (@transfered + msg.size) > 1472
-              @socket.puts "PING :excess"
-              @lock = true
-              @transfered = 0
-            else
-              @socket.puts msg
-              @transfered += msg.size
-            end
+      Thread.start { loop {
+        unless @lock || @queue.empty?
+          msg = @queue.shift
+          if (@transfered + msg.size) > 1472
+            # No honestly, :excess. The RFC is not too clear on this subject TODO
+            @socket.puts "PING :excess"
+            @lock = true
+            @transfered = 0
+          else
+            @socket.puts msg
+            @transfered += msg.size
           end
-          sleep 0.1
         end
-      end
+        sleep 0.1
+      }}
     end
   end
 
   class Event #:nodoc:
-    attr_accessor :match, :block, :commands
+    attr_accessor :match, :block
     def initialize(match, block)
       @match    = match
       @block    = block
-      @commands = []
     end
 
+    # Execute event in the context of EventContext.
     def invoke(params={})
       context = EventContext.new
       params[:match] = params[:message].match(@match) if @match && params[:message]
@@ -171,8 +167,7 @@ module Isaac
         @match        = params[:match]
       end
       context.instance_eval(&@block)
-      @commands = context.commands
-      self
+      context.commands
     end
   end
 
@@ -208,11 +203,8 @@ module Isaac
 
     # Kick nick from channel, with optional comment.
     def kick(channel, nick, comment=nil)
-      if comment
-        raw("KICK #{channel} #{nick} :#{comment}")
-      else
-        raw("KICK #{channel} #{nick}")
-      end
+      comment = " :#{comment}" if comment
+      raw("KICK #{channel} #{nick}#{comment}")
     end
 
     # Change topic of channel.
