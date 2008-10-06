@@ -24,7 +24,9 @@ module Isaac
 
     # This is plain stupid. Might be useful for logging or something later on.
     def start #:nodoc:
+      puts " ==== Starting Isaac ==== "
       connect
+      puts " ====  Ending Isaac  ==== "
     end
 
     # Configure the bot:
@@ -79,90 +81,92 @@ module Isaac
     end
 
     def connect
+      puts "Connecting to #{@config.server} at port #{@config.port}"
       @irc = TCPSocket.open(@config.server, @config.port)
+      puts "Connection established."
       @queue = Queue.new(@irc)
       @queue << "NICK #{@config.nick}"
       @queue << "USER #{@config.username} foobar foobar :#{@config.realname}"
-        @queue << @events[:connect].first.invoke if @events[:connect].first
-        while line = @irc.gets
-          handle line
-        end
-      end
-
-      # This is one hell of a nasty method. Something should be done, I suppose.
-      def handle(line)
-        p line if ARGV[0] == "-v" # TODO this is ugly as well. do something about the args.
-
-        case line
-        when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
-          nick        = $1
-          channel     = $2
-          message     = $3
-          type = channel.match(/^#/) ? :channel : :private
-          if event = event(type, message)
-            @queue << event.invoke(:nick => nick, :channel => channel, :message => message)
-          end
-        when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
-          error = $1
-          nick = channel = $2
-          if event = event(:error, error)
-            @queue << event.invoke(:nick => nick, :channel => channel)
-          end
-        when /^PING (\S+)/
-          #TODO not sure this is correct. Damned RFC.
-          @queue << "PONG #{$1}" 
-        when /^:\S+ PONG \S+ :excess/
-          @queue.lock = false
-        end
+      @queue << @events[:connect].first.invoke if @events[:connect].first
+      while line = @irc.gets
+        handle line
       end
     end
 
-    class Queue #:nodoc:
-      attr_accessor :lock
-      def initialize(socket)
-        @socket     = socket
-        @queue      = []
-        @transfered = 0
-        @lock       = false
-        transmit
-      end
+    # This is one hell of a nasty method. Something should be done, I suppose.
+    def handle(line)
+      p line if ARGV[0] == "-v" # TODO this is ugly as well. do something about the args.
 
-      # I luvz Rubyz
-      def << (msg)
-        @queue << msg
-      end
-
-      # To prevent excess flood no more than 1472 bytes will be sent to the
-      # server. When that limit is reached, @lock = true and the server will be
-      # PINGed. @lock will be true until a PONG is received (Application#handle).
-      def transmit
-        Thread.start { loop {
-          unless @lock || @queue.empty?
-            msg = @queue.shift
-            if (@transfered + msg.size) > 1472
-              # No honestly, :excess. The RFC is not too clear on this subject TODO
-              @socket.puts "PING :excess"
-              @lock = true
-              @transfered = 0
-            else
-              @socket.puts msg
-              @transfered += msg.size
-            end
-          end
-          sleep 0.1
-        }}
+      case line
+      when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
+        nick        = $1
+        channel     = $2
+        message     = $3
+        type = channel.match(/^#/) ? :channel : :private
+        if event = event(type, message)
+          @queue << event.invoke(:nick => nick, :channel => channel, :message => message)
+        end
+      when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
+        error = $1
+        nick = channel = $2
+        if event = event(:error, error)
+          @queue << event.invoke(:nick => nick, :channel => channel)
+        end
+      when /^PING (\S+)/
+        #TODO not sure this is correct. Damned RFC.
+        @queue << "PONG #{$1}" 
+      when /^:\S+ PONG \S+ :excess/
+        @queue.lock = false
       end
     end
+  end
 
-    class Event #:nodoc:
-      attr_accessor :match, :block
-      def initialize(match, block)
-        @match    = match
-        @block    = block
-      end
+  class Queue #:nodoc:
+    attr_accessor :lock
+    def initialize(socket)
+      @socket     = socket
+      @queue      = []
+      @transfered = 0
+      @lock       = false
+      transmit
+    end
 
-      # Execute event in the context of EventContext.
-      def invoke(params={})
+    # I luvz Rubyz
+    def << (msg)
+      @queue << msg
+    end
+
+    # To prevent excess flood no more than 1472 bytes will be sent to the
+    # server. When that limit is reached, @lock = true and the server will be
+    # PINGed. @lock will be true until a PONG is received (Application#handle).
+    def transmit
+      Thread.start { loop {
+        unless @lock || @queue.empty?
+          msg = @queue.shift
+          if (@transfered + msg.size) > 1472
+            # No honestly, :excess. The RFC is not too clear on this subject TODO
+            @socket.puts "PING :excess"
+            @lock = true
+            @transfered = 0
+          else
+            @socket.puts msg
+            @transfered += msg.size
+          end
+        end
+        sleep 0.1
+      }}
+    end
+  end
+
+  class Event #:nodoc:
+    attr_accessor :match, :block
+    def initialize(match, block)
+      @match    = match
+      @block    = block
+    end
+
+    # Execute event in the context of EventContext.
+    def invoke(params={})
       context = EventContext.new
       params[:match] = params[:message].match(@match) if @match && params[:message]
       context.instance_eval do
