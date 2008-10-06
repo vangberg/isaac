@@ -31,18 +31,19 @@
         </div>
         <div class='last-update'>
           Last Update:
-          <span class='datetime'>Mon Oct 06 14:37:36 +0200 2008</span>
+          <span class='datetime'>Mon Oct 06 15:10:22 +0200 2008</span>
         </div>
       </div>
       <div id='content'>
         <div id='text'>
           <div id='description'>
-            <h1>Isaac - the smallish DSL for writing IRC bots</h1>
+            <h1><a href="../classes/Isaac.html">Isaac</a> - the smallish DSL for writing IRC bots</h1>
             <p>
             You want to create an IRC bot quickly, but don&#8217;t care about
             registering, ping-pong messages, worrying about excess flood and fighting
-            with nasty regular expressions? Then Isaac is not for you. It will be. At
-            some point. But you shall be welcome to try it out and help me extend and
+            with nasty regular expressions? Then <a
+            href="../classes/Isaac.html">Isaac</a> is not for you. It will be. At some
+            point. But you shall be welcome to try it out and help me extend and
             beautify it. Be aware, the code is not stellar by any measure, most likely
             it is very crude. Oh, and a lot of concepts were borrowed from Sinatra (<a
             href="http://sinatrarb.com">sinatrarb.com</a>). Thanks.
@@ -51,7 +52,20 @@
             <p>
             An Isaac-bot needs a few basics:
             </p>
-            <pre>&#x000A;  require 'isaac'&#x000A;  config do |c|&#x000A;    c.nick    = &quot;AwesomeBot&quot;&#x000A;    c.server  = &quot;irc.freenode.net&quot;&#x000A;    c.port    = 6667&#x000A;  end</pre>
+            <pre>&#x000A;  $ cat bot.rb&#x000A;  require 'isaac'&#x000A;  config do |c|&#x000A;    c.nick    = &quot;AwesomeBot&quot;&#x000A;    c.server  = &quot;irc.freenode.net&quot;&#x000A;    c.port    = 6667&#x000A;  end</pre>
+            <p>
+            That&#8217;s it. Run <tt>ruby bot.rb</tt> and it will connect to the
+            specified server.
+            </p>
+            <h3>Connecting</h3>
+            <h3>Responding to messages</h3>
+            <p>
+            An <a href="../classes/Isaac.html">Isaac</a> bot is basically a bunch of
+            on()-events that react on certain messages send as private messages or to
+            channels that the bot has joined. The following will repeat everything
+            being sent as a private message:
+            </p>
+            <pre>&#x000A;  on :private, /.*/ do&#x000A;    msg nick, &quot;You said: #{message}&quot;&#x000A;  end</pre>
           </div>
           <div id='section'>
           </div>

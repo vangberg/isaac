@@ -1,2 +1,3 @@
-- more EventContext methods: kick, part, topic
 - default value for @port ?
+- mode() command, yes.
+- handle disconnects..

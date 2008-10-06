@@ -21,6 +21,7 @@ module Isaac
     def initialize #:nodoc:
       @events = Hash.new {|k,v| k[v] = []}
       @transfered = 0
+      @lock = false
     end
 
     def start #:nodoc:
@@ -36,6 +37,7 @@ module Isaac
     def config(&block)
       @config = Config.new
       block.call(@config)
+      @config
     end
 
     # Methods defined inside the helpers-block will be available to on()-events at execution time.
@@ -67,33 +69,23 @@ module Isaac
 
     def execute(params={}, &block) #:nodoc:
       event = Event.new(:dsl, block)
-      event.invoke(params).commands.each {|cmd| iputs cmd}
+      event.invoke(params).commands.each {|cmd| @queue << cmd}
     end
 
     private
-    # Write to IRC. Counts amount of transfered data, pings if necessary, to 
-    # avoid excess flood. Yet another crappy name.
-    def iputs(msg)
-      if (@transfered + msg.size) > 1472
-        @irc.puts "PING :twittirc"
-        @transfered = 0
-      end
-      @irc.puts msg
-      @transfered += msg.size
-    end
-
     def connect
       @irc = TCPSocket.open(@config.server, @config.port)
+      @queue = Queue.new(@irc)
       register
-      @events[:connect].first.invoke.commands.each {|cmd| iputs cmd}
+      @events[:connect].first.invoke.commands.each {|cmd| @queue << cmd} if @events[:connect].first
       while line = @irc.gets
         handle line
       end
     end
 
     def register
-      iputs "NICK #{@config.nick}"
-      iputs "USER foobar twitthost twittserv :My Name"
+      @queue << "NICK #{@config.nick}"
+      @queue << "USER foobar twitthost twittserv :My Name"
     end
 
     def handle(line)
@@ -108,18 +100,55 @@ module Isaac
         type = channel.match(/^#/) ? :channel : :private
         if event = @events[type].detect {|e| message =~ e.match}
           event.invoke(:nick => nick, :channel => channel, :message => message)
-          event.commands.each {|cmd| iputs cmd}
+          event.commands.each {|cmd| @queue << cmd}
         end
       when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
         error = $1
         nick = channel = $2
         if event = @events[:error].detect {|e| error == e.match.to_s }
           event.invoke(:nick => nick, :channel => channel)
-          event.commands.each {|cmd| iputs cmd}
+          event.commands.each {|cmd| @queue << cmd}
         end
       when /^PING (\S+)/
         #TODO not sure this is correect
-        iputs "PONG #{$1}" 
+        @queue << "PONG #{$1}" 
+      when /^:\S+ PONG \S+ :excess/
+        @queue.lock = false
+      end
+    end
+  end
+
+  class Queue
+    attr_accessor :lock
+    def initialize(socket)
+      @socket     = socket
+      @queue      = []
+      @transfered = 0
+      @lock       = false
+      transmit
+    end
+
+    def << (msg)
+      @queue << msg
+    end
+
+    def transmit
+      Thread.start do
+        loop do
+          unless @lock || @queue.empty?
+            p ">>>>> #{@transfered}"
+            msg = @queue.shift
+            if (@transfered + msg.size) > 1472
+              @socket.puts "PING :excess"
+              @lock = true
+              @transfered = 0
+            else
+              @socket.puts msg
+              @transfered += msg.size
+            end
+          end
+          sleep 0.1
+        end
       end
     end
   end
@@ -168,6 +197,27 @@ module Isaac
     #   join "#rollercoaster", "#j-lo"
     def join(*channels)
       channels.each {|channel| raw("JOIN #{channel}")}
+    end
+
+    # Part channel(s):
+    #   part "#awesome_channel"
+    #   part "#rollercoaster", "#j-lo"
+    def part(*channels)
+      channels.each {|channel| raw("PART #{channel}")}
+    end
+
+    # Kick nick from channel, with optional comment.
+    def kick(channel, nick, comment=nil)
+      if comment
+        raw("KICK #{channel} #{nick} :#{comment}")
+      else
+        raw("KICK #{channel} #{nick}")
+      end
+    end
+
+    # Change topic of channel.
+    def topic(channel, topic)
+      raw("TOPIC #{channel} :#{topic}")
     end
   end
 end

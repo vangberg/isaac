@@ -1,4 +1,4 @@
-require 'isaac'
+require 'lib/isaac'
 
 config do |c|
   c.nick    = "SomeBot"
@@ -14,6 +14,7 @@ end
 
 on :connect do
   join "#twittirc", "#awesome_channel"
+  msg 'asdfhaskfdhaskdfhaskdfasdf', 'foo'
 end
 
 on :private, /^t (.*)/ do
@@ -29,5 +30,5 @@ on :channel, /status/ do
 end
 
 on :error, 401 do
-  # Do something to respond on 'No such nick/channel'-error: Remove a user from the active-slot etc. etc.
+  puts "Ok, #{nick} doesn't exist."
 end

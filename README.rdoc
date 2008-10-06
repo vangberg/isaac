@@ -3,10 +3,20 @@ You want to create an IRC bot quickly, but don't care about registering, ping-po
 
 == Getting started
 An Isaac-bot needs a few basics:
+  $ cat bot.rb
   require 'isaac'
   config do |c|
     c.nick    = "AwesomeBot"
     c.server  = "irc.freenode.net"
     c.port    = 6667
+  end
+That's it. Run <tt>ruby bot.rb</tt> and it will connect to the specified server.
+
+=== Connecting
+
+=== Responding to messages
+An Isaac bot is basically a bunch of on()-events that react on certain messages send as private messages or to channels that the bot has joined. The following will repeat everything being sent as a private message:
+  on :private, /.*/ do
+    msg nick, "You said: #{message}"
   end
 
