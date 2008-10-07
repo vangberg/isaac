@@ -72,7 +72,7 @@ module Isaac
 
     def execute(params={}, &block) #:nodoc:
       event = Event.new(:dsl, block)
-      event.invoke(params).commands.each {|cmd| @queue << cmd}
+      @queue << event.invoke(params)
     end
 
     private
