@@ -2,6 +2,10 @@ require '../lib/isaac.rb'
 include Isaac
 
 describe Application do
+  before do
+    @app = Isaac.app
+  end
+
   it 'configures' do
     config do |c|
       c.nick = "awesome"
@@ -21,5 +25,10 @@ describe Application do
     context = EventContext.new
     context.rain_check("date")
     context.commands.should eql(["PRIVMSG miss_teen :can i take a rain check on the date?"])
+  end
+
+  it 'creates events' do
+    event = on(:channel, /matchy/) { msg channel, 'oh, matching!' }
+    @app.event(:channel, 'this should be matchy!!').should eql(event)
   end
 end

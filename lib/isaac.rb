@@ -9,9 +9,8 @@ module Isaac
   #   Isaac.execute do
   #     msg 'harryjr', 'you're awesome'
   #   end
-  def self.execute(&block)
-    # add params?
-    app.execute(&block)
+  def self.execute(params={}, &block)
+    app.execute(params, &block)
   end
 
   Config = Struct.new(:nick, :server, :port, :username, :realname)
@@ -67,7 +66,8 @@ module Isaac
     #       # Execute this if you try to send a message to a non-existing nick/channel.
     #     end
     def on(type, match=nil, &block)
-      @events[type] << Event.new(match, block)
+      @events[type] << e = Event.new(match, block)
+      return e
     end
 
     def execute(params={}, &block) #:nodoc:
@@ -75,7 +75,6 @@ module Isaac
       @queue << event.invoke(params)
     end
 
-    private
     def event(type, matcher)
       @events[type].detect {|e| matcher =~ e.match}
     end
@@ -85,10 +84,12 @@ module Isaac
         puts "Connecting to #{@config.server} at port #{@config.port}"
         @irc = TCPSocket.open(@config.server, @config.port)
         puts "Connection established."
+
         @queue = Queue.new(@irc)
         @queue << "NICK #{@config.nick}"
         @queue << "USER #{@config.username} foobar foobar :#{@config.realname}"
         @queue << @events[:connect].first.invoke if @events[:connect].first
+
         while line = @irc.gets
           handle line
         end
@@ -124,7 +125,7 @@ module Isaac
       end
     end
   end
-
+  
   class Queue #:nodoc:
     attr_accessor :lock
     def initialize(socket)
@@ -137,7 +138,8 @@ module Isaac
 
     # I luvz Rubyz
     def << (msg)
-      (@queue << msg).flatten!
+      # .flatten! returns nill if no modifications were made, thus we do this. 
+      @queue = (@queue << msg).flatten
     end
 
     # To prevent excess flood no more than 1472 bytes will be sent to the
