@@ -103,13 +103,14 @@ module Isaac
       p line if ARGV[0] == "-v" # TODO this is ugly as well. do something about the args.
 
       case line
-      when /^:(\S+)!\S+ PRIVMSG (\S+) :?(.*)/
+      when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
         nick        = $1
-        channel     = $2
-        message     = $3
+        userhost    = $2
+        channel     = $3
+        message     = $4
         type = channel.match(/^#/) ? :channel : :private
         if event = event(type, message)
-          @queue << event.invoke(:nick => nick, :channel => channel, :message => message)
+          @queue << event.invoke(:nick => nick, :userhost => userhost, :channel => channel, :message => message)
         end
       when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
         error = $1
@@ -177,6 +178,7 @@ module Isaac
       params[:match] = params[:message].match(@match) if @match && params[:message]
       context.instance_eval do
         @nick         = params[:nick]
+        @userhost     = params[:userhost]
         @channel      = params[:channel]
         @message      = params[:message]
         @match        = params[:match]
@@ -187,7 +189,7 @@ module Isaac
   end
 
   class EventContext
-    attr_accessor :nick, :channel, :message, :match, :commands
+    attr_accessor :nick, :userhost, :channel, :message, :match, :commands
     def initialize
       @commands = []
     end
