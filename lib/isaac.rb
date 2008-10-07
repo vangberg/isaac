@@ -137,7 +137,7 @@ module Isaac
 
     # I luvz Rubyz
     def << (msg)
-      @queue << msg
+      (@queue << msg).flatten!
     end
 
     # To prevent excess flood no more than 1472 bytes will be sent to the
