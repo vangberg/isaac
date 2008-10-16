@@ -13,7 +13,7 @@ module Isaac
     app.execute(params, &block)
   end
 
-  Config = Struct.new(:nick, :server, :port, :username, :realname)
+  Config = Struct.new(:nick, :server, :port, :username, :realname, :verbose)
 
   # These are top level methods you use to construct your bot.
   class Application
@@ -35,9 +35,10 @@ module Isaac
     #     c.port      = 6667
     #     c.realname  = "James Dean"
     #     c.username  = "jdean"
+    #     c.verbose   = true
     #   end
     def config(&block)
-      @config = Config.new('isaac_bot', 'irc.freenode.net', 6667, 'isaac', 'isaac')
+      @config = Config.new('isaac_bot', 'irc.freenode.net', 6667, 'isaac', 'isaac', false)
       block.call(@config)
       @config
     end
@@ -100,7 +101,7 @@ module Isaac
 
     # This is one hell of a nasty method. Something should be done, I suppose.
     def handle(line)
-      p line if ARGV[0] == "-v" # TODO this is ugly as well. do something about the args.
+      puts "< #{line}" if @config.verbose
 
       case line
       when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
