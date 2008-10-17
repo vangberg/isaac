@@ -77,7 +77,9 @@ module Isaac
     end
 
     def event(type, matcher)
-      @events[type].detect {|e| matcher =~ e.match}
+      @events[type].detect do |e| 
+        type == :error ? matcher == e.match : matcher =~ e.match
+      end
     end
 
     def connect
@@ -116,7 +118,7 @@ module Isaac
       when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
         error = $1
         nick = channel = $2
-        if event = event(:error, error)
+        if event = event(:error, error.to_i)
           @queue << event.invoke(:nick => nick, :channel => channel)
         end
       when /^PING (\S+)/
