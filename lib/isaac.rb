@@ -98,6 +98,9 @@ module Isaac
         end
       rescue Interrupt => e
         puts "Disconnected! An error occurred: #{e.inspect}"
+      rescue Timeout::Error => e
+        puts "Timeout: #{e}"
+        connect
       end
     end
 
