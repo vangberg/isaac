@@ -13,7 +13,7 @@ module Isaac
     app.execute(params, &block)
   end
 
-  Config = Struct.new(:nick, :server, :port, :username, :realname, :verbose)
+  Config = Struct.new(:nick, :server, :port, :username, :realname, :version, :verbose)
 
   # These are top level methods you use to construct your bot.
   class Application
@@ -35,10 +35,11 @@ module Isaac
     #     c.port      = 6667
     #     c.realname  = "James Dean"
     #     c.username  = "jdean"
+    #     c.version   = "James Dean Bot v2.34"
     #     c.verbose   = true
     #   end
     def config(&block)
-      @config = Config.new('isaac_bot', 'irc.freenode.net', 6667, 'isaac', 'isaac', false)
+      @config = Config.new('isaac_bot', 'irc.freenode.net', 6667, 'isaac', 'isaac', 'isaac-bot', false)
       block.call(@config)
       @config
     end
@@ -109,6 +110,8 @@ module Isaac
       puts "< #{line}" if @config.verbose
 
       case line
+      when /^:(\S+)!\S+ PRIVMSG \S+ :?\001VERSION\001/
+        @queue << "NOTICE #{$1} :\001VERSION #{@config.version}\001"
       when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
         nick, userhost, channel, message = $1, $2, $3, $4
         type = channel.match(/^#/) ? :channel : :private

@@ -6,6 +6,8 @@ config do |c|
   c.port    = 6667
   c.username = 'ihayes'
   c.realname = 'Isaac Hayes'
+  c.verbose  = true
+  c.version  = 'SchemaBot v0.1.2' 
 end
 
 helpers do
