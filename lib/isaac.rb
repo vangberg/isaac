@@ -206,6 +206,7 @@ module Isaac
       raw("PRIVMSG #{recipient} :#{text}")
     end
 
+    # Send a notice to nick/channel
     def notice(recipient, text)
       raw("PRIVMSG #{recipient} :#{text}")
     end
