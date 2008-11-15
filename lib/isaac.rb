@@ -203,6 +203,10 @@ module Isaac
       raw("PRIVMSG #{recipient} :#{text}")
     end
 
+    def notice(recipient, text)
+      raw("PRIVMSG #{recipient} :#{text}")
+    end
+
     # Join channel(s):
     #   join "#awesome_channel"
     #   join "#rollercoaster", "#j-lo"
