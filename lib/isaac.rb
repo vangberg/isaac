@@ -24,7 +24,7 @@ module Isaac
     # This is plain stupid. Might be useful for logging or something later on.
     def start #:nodoc:
       puts " ==== Starting Isaac ==== "
-      loop { connect }
+      connect
       puts " ====  Ending Isaac  ==== "
     end
 
@@ -99,7 +99,8 @@ module Isaac
       rescue Interrupt => e
         puts "Disconnected! An error occurred: #{e.inspect}"
       rescue Timeout::Error => e
-        puts "Timeout: #{e}"
+        puts "Timeout: #{e}. Reconnecting."
+        connect
       end
     end
 
