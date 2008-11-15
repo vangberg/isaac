@@ -24,7 +24,7 @@ module Isaac
     # This is plain stupid. Might be useful for logging or something later on.
     def start #:nodoc:
       puts " ==== Starting Isaac ==== "
-      connect
+      loop { connect }
       puts " ====  Ending Isaac  ==== "
     end
 
@@ -100,7 +100,6 @@ module Isaac
         puts "Disconnected! An error occurred: #{e.inspect}"
       rescue Timeout::Error => e
         puts "Timeout: #{e}"
-        connect
       end
     end
 
@@ -110,10 +109,7 @@ module Isaac
 
       case line
       when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
-        nick        = $1
-        userhost    = $2
-        channel     = $3
-        message     = $4
+        nick, userhost, channel, message = $1, $2, $3, $4
         type = channel.match(/^#/) ? :channel : :private
         if event = event(type, message)
           @queue << event.invoke(:nick => nick, :userhost => userhost, :channel => channel, :message => message)
@@ -180,15 +176,10 @@ module Isaac
 
     # Execute event in the context of EventContext.
     def invoke(params={})
-      context = EventContext.new
-      params[:match] = params[:message].match(@match) if @match && params[:message]
-      context.instance_eval do
-        @nick         = params[:nick]
-        @userhost     = params[:userhost]
-        @channel      = params[:channel]
-        @message      = params[:message]
-        @match        = params[:match]
-      end
+      match = params[:message].match(@match) if @match && params[:message]
+      params.merge!(:match => match)
+
+      context = EventContext.new(params)
       context.instance_eval(&@block)
       context.commands
     end
@@ -196,7 +187,8 @@ module Isaac
 
   class EventContext
     attr_accessor :nick, :userhost, :channel, :message, :match, :commands
-    def initialize
+    def initialize(args = {})
+      args.each {|k,v| instance_variable_set("@#{k}",v)}
       @commands = []
     end
 
