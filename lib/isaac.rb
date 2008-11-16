@@ -49,7 +49,9 @@ module Isaac
       EventContext.class_eval(&block)
     end
 
-    # on()-events responds to certain actions. Depending on +type+ certain local variables are available: +nick+, +channel+, +message+ and in particular +match+, which contains a MatchData object returned by the given regular expression.
+    # on()-events responds to certain actions. Depending on +type+ certain local variables are available:
+    # +nick+, +channel+, +message+ and in particular +match+, which contains a MatchData object returned 
+    # by the given regular expression.
     #
     # * Do something after connection has been established, e.g. join channels.
     #     on :connect do
