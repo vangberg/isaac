@@ -107,7 +107,7 @@ module Isaac
 
     # This is one hell of a nasty method. Something should be done, I suppose.
     def handle(line)
-      puts "< #{line}" if @config.verbose
+      puts "> #{line}" if @config.verbose
 
       case line
       when /^:(\S+)!\S+ PRIVMSG \S+ :?\001VERSION\001/
@@ -155,7 +155,7 @@ module Isaac
     def transmit
       Thread.start { loop {
         unless @lock || @queue.empty?
-          msg = @queue.shift
+          msg = @queue.first
           if (@transfered + msg.size) > 1472
             # No honestly, :excess. The RFC is not too clear on this subject TODO
             @socket.puts "PING :excess"
@@ -164,6 +164,7 @@ module Isaac
           else
             @socket.puts msg
             @transfered += msg.size
+            @queue.shift
           end
         end
         sleep 0.1
