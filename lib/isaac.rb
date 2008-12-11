@@ -245,6 +245,11 @@ module Isaac
     def invite(channel, *nicks)
       nicks.each {|nick| raw("INVITE #{nick} #{channel}")}
     end
+    
+    # Change nickname
+    def nick(nickname)
+      raw("NICK #{nickname}")
+    end
   end
 end
 
