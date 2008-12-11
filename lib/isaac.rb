@@ -19,6 +19,7 @@ module Isaac
   class Application
     def initialize #:nodoc:
       @events = Hash.new {|k,v| k[v] = []}
+      @registration = []
     end
 
     # This is plain stupid. Might be useful for logging or something later on.
@@ -91,9 +92,10 @@ module Isaac
         @irc = TCPSocket.open(@config.server, @config.port)
         puts "Connection established."
 
+        @irc.puts "NICK #{@config.nick}"
+        @irc.puts "USER #{@config.username} foobar foobar :#{@config.realname}"
+
         @queue = Queue.new(@irc)
-        @queue << "NICK #{@config.nick}"
-        @queue << "USER #{@config.username} foobar foobar :#{@config.realname}"
         @queue << @events[:connect].first.invoke if @events[:connect].first
 
         while line = @irc.gets
@@ -105,6 +107,11 @@ module Isaac
         puts "Timeout: #{e}. Reconnecting."
         connect
       end
+    end
+
+    def registered?
+      arr = [1,2,3,4] - @registration 
+      arr.empty?
     end
 
     # This is one hell of a nasty method. Something should be done, I suppose.
@@ -120,6 +127,9 @@ module Isaac
         if event = event(type, message)
           @queue << event.invoke(:nick => nick, :userhost => userhost, :channel => channel, :message => message)
         end
+      when /^:\S+ 00([1-4])/
+        @registration << $1.to_i
+        @queue.lock = false if registered?
       when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
         error = $1
         nick = channel = $2
@@ -141,7 +151,7 @@ module Isaac
       @socket     = socket
       @queue      = []
       @transfered = 0
-      @lock       = false
+      @lock       = true
       transmit
     end
 
