@@ -29,4 +29,12 @@ describe EventContext do
     @context.topic("#awesome", "this chan is awesome!")
     @context.commands.should eql(["TOPIC #awesome :this chan is awesome!"])
   end
+  it 'invite with multiple nicks' do
+    @context.invite("#awesome", "arnie", "brigitte")
+    @context.commands.should eql(["INVITE arnie #awesome","INVITE brigitte #awesome"])
+  end
+  it 'change nickname' do
+    @context.nick("awesomer")
+    @context.commands.should eql(["NICK awesomer"])
+  end
 end

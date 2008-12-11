@@ -248,6 +248,18 @@ module Isaac
     def topic(channel, topic)
       raw("TOPIC #{channel} :#{topic}")
     end
+    
+    # Invite nicks to channel
+    #    invite "#awesome_channel", "arnie"
+    #    invite "#awesome_channel", "arnie", "brigitte"
+    def invite(channel, *nicks)
+      nicks.each {|nick| raw("INVITE #{nick} #{channel}")}
+    end
+    
+    # Change nickname
+    def nick(nickname)
+      raw("NICK #{nickname}")
+    end
   end
 end
 
