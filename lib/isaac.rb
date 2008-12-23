@@ -13,7 +13,7 @@ module Isaac
     app.execute(params, &block)
   end
 
-  Config = Struct.new(:nick, :server, :port, :username, :realname, :version, :verbose)
+  Config = Struct.new(:nick, :server, :port, :username, :realname, :version, :verbose, :password)
 
   # These are top level methods you use to construct your bot.
   class Application
@@ -91,7 +91,8 @@ module Isaac
         puts "Connecting to #{@config.server} at port #{@config.port}"
         @irc = TCPSocket.open(@config.server, @config.port)
         puts "Connection established."
-
+	
+	@irc.puts "PASS #{@config.password}" if @config.password
         @irc.puts "NICK #{@config.nick}"
         @irc.puts "USER #{@config.username} foobar foobar :#{@config.realname}"
 
