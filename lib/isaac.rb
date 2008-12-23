@@ -139,7 +139,8 @@ module Isaac
         end
       when /^PING (\S+)/
         #TODO not sure this is correct. Damned RFC.
-        @queue << "PONG #{$1}" 
+	@irc.puts "PONG #{$1}" if not registered?
+        @queue << "PONG #{$1}"
       when /^:\S+ PONG \S+ :excess/
         @queue.lock = false
       end
