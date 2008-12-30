@@ -34,7 +34,7 @@ describe EventContext do
     @context.commands.should eql(["INVITE arnie #awesome","INVITE brigitte #awesome"])
   end
   it 'change nickname' do
-    @context.nick("awesomer")
+    @context.set_nick("awesomer")
     @context.commands.should eql(["NICK awesomer"])
   end
 end

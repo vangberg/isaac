@@ -262,7 +262,7 @@ module Isaac
     end
     
     # Change nickname
-    def nick(nickname)
+    def set_nick(nickname)
       raw("NICK #{nickname}")
     end
   end
