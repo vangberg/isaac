@@ -13,7 +13,10 @@ describe Application do
       c.port = 6667
       c.username = "awesome"
       c.realname = "Awesome Bot"
-    end.should eql(Isaac::Config.new("awesome", "irc.freenode.net", 6667, "awesome", "Awesome Bot"))
+      c.version = 'awesome 0.1'
+      c.verbose = false
+      c.password = 'secret'
+    end.should eql(Isaac::Config.new("awesome", "irc.freenode.net", 6667, "awesome", "Awesome Bot", 'awesome 0.1', false, 'secret'))
   end
 
   it 'defines helpers' do
