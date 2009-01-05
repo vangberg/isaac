@@ -92,7 +92,7 @@ module Isaac
         @irc = TCPSocket.open(@config.server, @config.port)
         puts "Connection established."
 	
-	@irc.puts "PASS #{@config.password}" if @config.password
+      	@irc.puts "PASS #{@config.password}" if @config.password
         @irc.puts "NICK #{@config.nick}"
         @irc.puts "USER #{@config.username} foobar foobar :#{@config.realname}"
 
@@ -228,7 +228,28 @@ module Isaac
     def notice(recipient, text)
       raw("PRIVMSG #{recipient} :#{text}")
     end
-
+    
+    # Set modes(s)
+    # mode "#awesome" "+im"
+    # mode "arnie" "+o-v"
+    # mode "#awesome" "+k" "password"
+    def mode(target, mode, option=nil)
+      option = " #{option}" if option
+      raw "MODE #{target} #{mode}#{option}"
+    end
+    
+    # Ban a hostmask
+    # ban_mask "#awesome" "*!*@*"
+    def ban_mask(channel, mask)
+      mode channel, "+b", mask
+    end
+    
+    # Unban a hostmask
+    # unban_mask "#awesome" "*!*@*"
+    def unban_mask(channel, mask)
+      mode channel, "-b", mask
+    end    
+    
     # Join channel(s):
     #   join "#awesome_channel"
     #   join "#rollercoaster", "#j-lo"

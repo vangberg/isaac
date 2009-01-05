@@ -37,4 +37,16 @@ describe EventContext do
     @context.set_nick("awesomer")
     @context.commands.should eql(["NICK awesomer"])
   end
+  it 'mode' do
+    @context.mode("#awesome", "+k", "password")
+    @context.commands.should eql(["MODE #awesome +k password"])
+  end
+  it 'self mode' do
+    @context.mode("arnie", "+x")
+    @context.commands.should eql(["MODE arnie +x"])
+  end
+  it 'bans a hostmask' do
+    @context.ban_mask "#awesome", "*!*@*"
+    @context.commands.should eql(["MODE #awesome +b *!*@*"])
+  end
 end
