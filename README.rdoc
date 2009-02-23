@@ -24,7 +24,7 @@ After the bot has connected to the IRC server you might want to join some channe
 === Responding to messages
 Joining a channel and sitting idle is not much fun. Let's repeat everything being said in these channels:
 
-  on :channel, // do
+  on :channel do
     msg channel, message
   end
 
@@ -40,7 +40,7 @@ If you want to match private messages use the +on :private+ event:
 
   on :private, /^login (\S+) (\S+)/ do
     username = match[0]
-    password = match[0]
+    password = match[1]
     # do something to authorize or whatevz.
     msg nick, "Login successful!"
   end
