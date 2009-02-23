@@ -67,7 +67,7 @@ Errors, as specified by RFC 1459, can be reacted upon as well. If you e.g. try t
 
 Available variables: +nick+ and +channel+.
 
-=== Send commands from outside an event
+=== Send commands from outside an event (not implemented in Shaft atm)
 You might want to send messages, join channels etc. without it strictly being the result of an on()-event, e.g. send a message every time a RSS feed is updated or whatever. You can use +Isaac.execute+ for that, and all your normal commands, +msg+, +join+, +topic+ etc. will be available:
 
   class K
