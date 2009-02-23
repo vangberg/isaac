@@ -5,7 +5,7 @@ require 'rr'
 require 'lib/isaac'
 begin
   require 'ruby-debug'
-rescue; end
+rescue LoadError; end
 
 class Isaac::Bot
   include Test::Unit::Assertions
