@@ -25,4 +25,21 @@ class TestCommands < Test::Unit::TestCase
     assert_equal "JOIN #foo\n", @server.gets
     assert_equal "JOIN #bar\n", @server.gets
   end
+
+  test "channels are parted" do
+    bot = mock_bot {}
+    bot_is_connected
+
+    bot.part "#foo", "#bar"
+    assert_equal "PART #foo\n", @server.gets
+    assert_equal "PART #bar\n", @server.gets
+  end
+
+  test "topic is set" do
+    bot = mock_bot {}
+    bot_is_connected
+
+    bot.topic "#foo", "bar baz"
+    assert_equal "TOPIC #foo :bar baz\n", @server.gets
+  end
 end

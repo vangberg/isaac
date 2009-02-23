@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name     = "isaac"
-  s.version  = "0.2"
+  s.version  = "0.2.1"
   s.date     = "2009-02-23"
   s.summary  = "The smallish DSL for writing IRC bots"
   s.email    = "harry@vangberg.name"

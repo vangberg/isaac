@@ -1,6 +1,8 @@
 require 'socket'
 
 module Isaac
+  VERSION = '0.2.1'
+
   Config = Struct.new(:server, :port, :password, :nick, :realname, :version, :environment, :verbose)
 
   def self.bot
@@ -17,8 +19,6 @@ module Isaac
 
       instance_eval(&b) if block_given?
     end
-
-    def binding; binding; end
 
     def start
       @irc = IRC.new(self, @config)
@@ -68,6 +68,14 @@ module Isaac
 
     def join(*channels)
       channels.each {|channel| raw("JOIN #{channel}")}
+    end
+
+    def part(*channels)
+      channels.each {|channel| raw("PART #{channel}")}
+    end
+
+    def topic(channel, text)
+      raw("TOPIC #{channel} :#{text}")
     end
   end
 
