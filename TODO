@@ -2,3 +2,6 @@
 - mode() for setting nick/channel modes
 - a bunch of IRC commands: ban, names, list, etc.
 - More specs
+- halt events
+- 'halt' events (sr)
+- /(foo) (bar)/ do |foo, bar|

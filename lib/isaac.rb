@@ -94,7 +94,7 @@ module Isaac
 	
       	@irc.puts "PASS #{@config.password}" if @config.password
         @irc.puts "NICK #{@config.nick}"
-        @irc.puts "USER #{@config.username} foobar foobar :#{@config.realname}"
+        @irt.puts "USER #{@config.username} foobar foobar :#{@config.realname}"
 
         @queue = Queue.new(@irc)
         @queue << @events[:connect].first.invoke if @events[:connect].first
@@ -139,8 +139,8 @@ module Isaac
         end
       when /^PING (\S+)/
         #TODO not sure this is correct. Damned RFC.
-	if registered?
-	  @queue << "PONG #{$1}"
+        if registered?
+          @queue << "PONG #{$1}"
         else
           @irc.puts "PONG #{$1}"
         end
