@@ -1,9 +1,11 @@
 require 'rubygems'
-require 'ruby-debug'
 require 'test/unit'
 require 'context'
 require 'rr'
 require 'lib/isaac'
+begin
+  require 'ruby-debug'
+rescue; end
 
 class Isaac::Bot
   include Test::Unit::Assertions
