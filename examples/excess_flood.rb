@@ -1,6 +1,6 @@
 require 'lib/isaac.rb'
 
-config do |c|
+configure do |c|
   c.nick    = "The_Echo_Bot"
   c.server  = "irc.freenode.net"
   c.port    = 6667

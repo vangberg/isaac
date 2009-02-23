@@ -1,5 +1,4 @@
 = Isaac - the smallish DSL for writing IRC bots
-You want to create an IRC bot quickly? Then Isaac is you. It will be. At some point, at least. But you shall be welcome to try it out and help me extend and beautify it. Be aware, the code is not stellar by any measure, most likely it is very crude and a large portion of the IRC standard has not been implemented, simply because I haven't needed it yet. Oh, and a lot of concepts were borrowed from Sinatra (http://sinatrarb.com). Thanks.
 
 == Features
 * Wraps parsing of incoming messages and raw IRC commands in simple constructs.
@@ -9,7 +8,7 @@ You want to create an IRC bot quickly? Then Isaac is you. It will be. At some po
 == Getting started
 An Isaac-bot needs a few basics:
   require 'isaac'
-  config do |c|
+  configure do |c|
     c.nick    = "AwesomeBot"
     c.server  = "irc.freenode.net"
     c.port    = 6667
@@ -25,21 +24,23 @@ After the bot has connected to the IRC server you might want to join some channe
 === Responding to messages
 Joining a channel and sitting idle is not much fun. Let's repeat everything being said in these channels:
 
-  on :channel, /.*/ do
+  on :channel, // do
     msg channel, message
   end
 
-Notice the +channel+ and +message+ variables. Additionally +nick+ and +match+ is available for channel-events. +nick+ being the sender of the message, +match+ being a MatchData object returned by the regular expression you specified:
+Notice the +channel+ and +message+ variables. Additionally +nick+ and +match+ is
+available for channel-events. +nick+ being the sender of the message, +match+
+being an array of captures from the regular expression:
 
   on :channel, /^quote this: (.*)/ do
-    msg channel, "Quote: '#{match[1]}' by #{nick}"
+    msg channel, "Quote: '#{match[0]}' by #{nick}"
   end
 
 If you want to match private messages use the +on :private+ event:
 
   on :private, /^login (\S+) (\S+)/ do
-    username = match[1]
-    password = match[2]
+    username = match[0]
+    password = match[0]
     # do something to authorize or whatevz.
     msg nick, "Login successful!"
   end
@@ -84,11 +85,4 @@ You might want to send messages, join channels etc. without it strictly being th
 The source is hosted at GitHub: http://github.com/ichverstehe/isaac
 
 == License
-  ------------------------------------------------------------------------------
-  "THE BEER-WARE LICENSE" (Revision 42):
-  <ichverstehe@gmail.com> wrote this file. As long as you retain this notice you
-  can do whatever you want with this stuff. If we meet some day, and you think
-  this stuff is worth it, you can buy me a beer in return.
-  ------------------------------------------------------------------------------
-
-
+The MIT. Google it.

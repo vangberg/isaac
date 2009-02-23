@@ -1,0 +1,25 @@
+I actually like Isaac quite a lot. But the implementation was broken and there
+were hardly any tests available, so I took some time to do a complete rewrite.
+This time we have extensive (and retarded) testing, and while rewriting it I
+realized that I could simplify the message queue quite a lot and get rid of all
+threads and what not. So, here it is.
+
+New features? Hardly any. But, you can now halt an event, like this:
+
+  on :channel, // do
+    halt unless nick == "spicoli"
+    # .. never gets here unless the message
+    # is from a user named 'spicoli'.
+  end
+
+And regular expression captures will eventually be handed over to block
+arguments:
+
+  on :channel, /(foo) (bar)/ do |a,b|
+    a #=> foo
+    b #=> bar
+  end
+
+Or, that is - it *will* be implemented, eventually.
+
+Enjoy.

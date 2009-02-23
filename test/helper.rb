@@ -31,6 +31,7 @@ class Test::Unit::TestCase
   def bot_is_connected
     assert_equal "NICK isaac\n", @server.gets
     assert_equal "USER isaac 0 * :Isaac\n", @server.gets
+    1.upto(4) {|i| @server.puts ":localhost 00#{i}"}
   end
 
   def assert_empty_buffer(io)

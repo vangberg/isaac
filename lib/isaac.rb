@@ -18,6 +18,8 @@ module Isaac
       instance_eval(&b) if block_given?
     end
 
+    def binding; binding; end
+
     def start
       @irc = IRC.new(self, @config)
       @irc.connect
@@ -41,15 +43,15 @@ module Isaac
         env[:nick], env[:userhost], env[:channel], env[:error]
       self.message = env[:message] || ""
 
-      regexp, block = @events[event] && @events[event].detect do |regexp, block|
+      event = @events[event] && @events[event].detect do |regexp,_|
         message.match(regexp)
       end
 
-      self.match = message.match(regexp)
-      match_arr = match.to_a
-      match_arr.shift
-
-      catch(:halt) { block.call(*match_arr) }
+      if event
+        regexp, block = *event
+        self.match = message.match(regexp).captures
+        catch(:halt) { instance_eval(&block) }
+      end
     end
 
     def halt
@@ -73,6 +75,8 @@ module Isaac
     def initialize(bot, config)
       @bot, @config = bot, config
       @transfered = 0
+      @registration = []
+      @lock = false
       @queue = []
     end
 
@@ -81,6 +85,7 @@ module Isaac
       message "PASSWORD #{@config.password}" if @config.password
       message "NICK #{@config.nick}"
       message "USER #{@config.nick} 0 * :#{@config.realname}"
+      @lock = true
 
       # This should probably be somewhere else..
       if @config.environment == :test
@@ -99,8 +104,15 @@ module Isaac
     def parse(input)
       puts "<< #{input}" if @bot.config.verbose
       case input
+      when /^:\S+ 00([1-4])/
+        @registration << $1.to_i
+        if registered?
+          @lock = false
+          @bot.dispatch(:connect)
+          continue_queue
+        end
       when /^PING (\S+)/
-        @transfered = 0
+        @transfered, @lock = 0, false
         message "PONG #{$1}"
         continue_queue
       when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
@@ -111,9 +123,13 @@ module Isaac
         env = {:error => $1.to_i, :message => $1, :nick => $2, :channel => $2}
         @bot.dispatch(:error, env)
       when /^:\S+ PONG/
-        @transfered = 0
+        @transfered, @lock = 0, false
         continue_queue
       end
+    end
+
+    def registered?
+      ([1,2,3,4] - @registration).empty?
     end
 
     def message(msg)
@@ -123,13 +139,14 @@ module Isaac
 
     def continue_queue
       # <= 1472 allows for \n
-      while msg = @queue.shift
+      while !@lock && msg = @queue.shift
         if (@transfered + msg.size) < 1472
           @socket.puts msg
           puts ">> #{msg}" if @bot.config.verbose
           @transfered += msg.size + 1
         else
           @queue.unshift(msg)
+          @lock = true
           @socket.puts "PING :#{@bot.config.server}"
           break
         end
