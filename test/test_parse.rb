@@ -68,4 +68,14 @@ class TestParse < Test::Unit::TestCase
 
     @server.puts ":server 401 isaac jeff :No such nick/channel"
   end
+
+  test "ctcp version request are answered" do
+    bot = mock_bot {
+      configure {|c| c.version = "Ridgemont 0.1"}
+    }
+    bot_is_connected
+
+    @server.puts ":jeff!spicoli@name.com PRIVMSG isaac :\001VERSION\001"
+    assert_equal "NOTICE jeff :\001VERSION Ridgemont 0.1\001\n", @server.gets
+  end
 end

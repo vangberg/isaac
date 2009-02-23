@@ -1,7 +1,7 @@
 require 'socket'
 
 module Isaac
-  Config = Struct.new(:server, :port, :password, :nick, :realname, :environment, :verbose)
+  Config = Struct.new(:server, :port, :password, :nick, :realname, :version, :environment, :verbose)
 
   def self.bot
     @bot ||= Bot.new
@@ -13,7 +13,7 @@ module Isaac
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, nil, "isaac", "Isaac", :production, false)
+      @config = Config.new("localhost", 6667, nil, "isaac", "Isaac", 'isaac', :production, false)
 
       instance_eval(&b) if block_given?
     end
@@ -111,10 +111,11 @@ module Isaac
           @bot.dispatch(:connect)
           continue_queue
         end
+      when /^:(\S+)!\S+ PRIVMSG \S+ :?\001VERSION\001/
+        message "NOTICE #{$1} :\001VERSION #{@bot.config.version}\001"
       when /^PING (\S+)/
         @transfered, @lock = 0, false
         message "PONG #{$1}"
-        continue_queue
       when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
         env = { :nick => $1, :userhost => $2, :channel => $3, :message => $4 }
         type = env[:channel].match(/^#/) ? :channel : :private
