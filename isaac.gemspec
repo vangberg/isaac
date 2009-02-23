@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name     = "isaac"
-  s.version  = "0.0.4"
-  s.date     = "2009-01-28"
+  s.version  = "0.2"
+  s.date     = "2009-02-23"
   s.summary  = "The smallish DSL for writing IRC bots"
-  s.email    = "ichverstehe@gmail.com"
+  s.email    = "harry@vangberg.name"
   s.homepage = "http://github.com/ichverstehe/isaac"
   s.description = "Small DSL for writing IRC bots."
   s.rubyforge_project = "isaac"
