@@ -5,7 +5,7 @@ class TestParse < Test::Unit::TestCase
     bot = mock_bot {}
     bot_is_connected
 
-    bot.irc.parse "PING :foo.bar"
+    @server.puts "PING :foo.bar"
     assert_equal "PONG :foo.bar\n", @server.gets
   end
 
@@ -15,7 +15,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    bot.irc.parse ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
+    @server.puts ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
     assert_equal "PRIVMSG foo :bar baz\n", @server.gets
   end
 
@@ -25,7 +25,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    bot.irc.parse ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"
+    @server.puts ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"
     assert_equal "PRIVMSG foo :bar baz\n", @server.gets
   end
 
@@ -39,7 +39,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    bot.irc.parse ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
+    @server.puts ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
   end
 
   test "channel event has environment" do
@@ -53,7 +53,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    bot.irc.parse ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"
+    @server.puts ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"
   end
 
   test "errors are caught and dispatched" do
@@ -66,6 +66,6 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    bot.irc.parse ":server 401 isaac jeff :No such nick/channel"
+    @server.puts ":server 401 isaac jeff :No such nick/channel"
   end
 end

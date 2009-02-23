@@ -82,7 +82,14 @@ module Isaac
       message "NICK #{@config.nick}"
       message "USER #{@config.nick} 0 * :#{@config.realname}"
 
-      unless @config.environment == :test
+      # This should probably be somewhere else..
+      if @config.environment == :test
+        Thread.start {
+          while line = @socket.gets
+            parse line
+          end
+        }
+      else
         while line = @socket.gets
           parse line
         end

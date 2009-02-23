@@ -33,7 +33,7 @@ class TestQueue < Test::Unit::TestCase
     16.times { @server.gets }
     @server.gets # PING message
 
-    bot.irc.parse ":localhost PONG :localhost"
+    @server.puts ":localhost PONG :localhost"
     assert_equal "this should not flood!\n", @server.gets
   end
 
@@ -44,7 +44,7 @@ class TestQueue < Test::Unit::TestCase
     bot.dispatch :connect
     16.times { @server.gets }
     @server.gets # PING message triggered by transfer lock
-    bot.irc.parse "PING :localhost"
+    @server.puts "PING :localhost"
 
     assert_equal "this should not flood!\n", @server.gets
   end
