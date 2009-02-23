@@ -21,8 +21,11 @@ module Isaac
     end
 
     def start
+      puts "========================================="
+      puts "Connecting to #{@config.server}:#{@config.port}"
       @irc = IRC.new(self, @config)
       @irc.connect
+      puts "========================================="
     end
 
     def on(event, match=//, &b)
