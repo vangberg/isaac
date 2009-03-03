@@ -96,17 +96,8 @@ module Isaac
       message "USER #{@config.nick} 0 * :#{@config.realname}"
       @lock = true
 
-      # This should probably be somewhere else..
-      if @config.environment == :test
-        Thread.start {
-          while line = @socket.gets
-            parse line
-          end
-        }
-      else
-        while line = @socket.gets
-          parse line
-        end
+      while line = @socket.gets
+        parse line
       end
     end
 

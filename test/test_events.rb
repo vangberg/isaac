@@ -29,7 +29,7 @@ class TestEvents < Test::Unit::TestCase
     bot_is_connected
 
     bot.dispatch(:channel, :message => "Hey")
-    assert_empty_buffer @server
+    assert @server.empty?
   end
 
   test "connect-event is dispatched at connection" do
