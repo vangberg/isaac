@@ -43,11 +43,13 @@ class TestEvents < Test::Unit::TestCase
 
   test "regular expression match is accessible" do
     bot = mock_bot {
-      on(:channel, /foo (bar)/) {assert_equal "bar", match[0]}
+      on(:channel, /foo (bar)/) {msg "foo", match[0]}
     }
     bot_is_connected
 
     bot.dispatch(:channel, :message => "foo bar")
+
+    assert_equal "PRIVMSG foo :bar\n", @server.gets
   end
 
   #test "regular expression matches is handed to block arguments" do

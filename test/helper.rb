@@ -13,10 +13,6 @@ module Test::Unit::Assertions
   end
 end
 
-class Isaac::Bot
-  include Test::Unit::Assertions
-end
-
 class MockSocket
   def self.pipe
     socket1, socket2 = new, new
