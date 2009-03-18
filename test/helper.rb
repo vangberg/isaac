@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'test/unit'
-require 'context'
+require 'contest'
 require 'rr'
 require 'lib/isaac'
 begin
