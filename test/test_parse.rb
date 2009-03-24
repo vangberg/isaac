@@ -32,34 +32,41 @@ class TestParse < Test::Unit::TestCase
   test "private event has environment" do
     bot = mock_bot {
       on :private, // do
-        assert_equal "johnny", nick
-        assert_equal "john@doe.com", userhost
-        assert_equal "hello, you!", message
+        raw nick
+        raw userhost
+        raw message
       end
     }
     bot_is_connected
 
     @server.puts ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
+    assert_equal "johnny\n", @server.gets
+    assert_equal "john@doe.com\n", @server.gets
+    assert_equal "hello, you!\n", @server.gets
   end
 
   test "channel event has environment" do
     bot = mock_bot {
       on :channel, // do
-        assert_equal "johnny", nick
-        assert_equal "john@doe.com", userhost
-        assert_equal "hello, folks!", message
-        assert_equal "#awesome", channel
+        raw nick
+        raw userhost
+        raw message
+        raw channel
       end
     }
     bot_is_connected
 
     @server.puts ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"
+    assert_equal "johnny\n", @server.gets
+    assert_equal "john@doe.com\n", @server.gets
+    assert_equal "hello, folks!\n", @server.gets
+    assert_equal "#awesome\n", @server.gets
   end
 
   test "errors are caught and dispatched" do
     bot = mock_bot {
       on(:error, 401) {
-        assert_equal 401, error
+        assert_equal 406, error
         assert_equal "jeff", nick
         assert_equal "jeff", channel
       }
