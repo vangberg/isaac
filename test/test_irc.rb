@@ -12,7 +12,7 @@ class TestIrc < Test::Unit::TestCase
     bot = mock_bot {
       configure {|c| c.password = "foo"}
     }
-    assert_equal "PASSWORD foo\n", @server.gets
+    assert_equal "PASS foo\n", @server.gets
   end
 
   test "no messages are sent when registration isn't complete" do

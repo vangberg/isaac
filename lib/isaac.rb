@@ -91,7 +91,7 @@ module Isaac
 
     def connect
       @socket = TCPSocket.open(@config.server, @config.port)
-      message "PASSWORD #{@config.password}" if @config.password
+      message "PASS #{@config.password}" if @config.password
       message "NICK #{@config.nick}"
       message "USER #{@config.nick} 0 * :#{@config.realname}"
       @lock = true
