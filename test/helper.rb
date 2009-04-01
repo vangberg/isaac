@@ -27,6 +27,7 @@ class MockSocket
     Timeout.timeout(1) {@in.gets}
   end
   def puts(m) @out.puts(m) end
+  def print(m) @out.write(m) end
   def eof?() @in.eof? end
   def empty?
     begin

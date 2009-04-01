@@ -118,7 +118,7 @@ module Isaac
 
     def parse(input)
       puts "<< #{input}" if @bot.config.verbose
-      case input
+      case input.chomp
       when /^:\S+ 00([1-4])/
         @registration << $1.to_i
         if registered?

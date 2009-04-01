@@ -66,14 +66,17 @@ class TestParse < Test::Unit::TestCase
   test "errors are caught and dispatched" do
     bot = mock_bot {
       on(:error, 401) {
-        assert_equal 406, error
-        assert_equal "jeff", nick
-        assert_equal "jeff", channel
+        raw error
+        raw nick
+        raw channel
       }
     }
     bot_is_connected
 
     @server.puts ":server 401 isaac jeff :No such nick/channel"
+    assert_equal "401\n", @server.gets
+    assert_equal "jeff\n", @server.gets
+    assert_equal "jeff\n", @server.gets
   end
 
   test "ctcp version request are answered" do
@@ -84,5 +87,15 @@ class TestParse < Test::Unit::TestCase
 
     @server.puts ":jeff!spicoli@name.com PRIVMSG isaac :\001VERSION\001"
     assert_equal "NOTICE jeff :\001VERSION Ridgemont 0.1\001\n", @server.gets
+  end
+
+  test "trailing newlines are removed" do
+    bot = mock_bot {
+      on(:channel, /(.*)/) {msg "foo", "#{match[0]} he said"}
+    }
+    bot_is_connected
+
+    @server.print ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!\r\n"
+    assert_equal "PRIVMSG foo :hello, folks! he said\n", @server.gets
   end
 end

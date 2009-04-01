@@ -1,4 +1,4 @@
 - Handle disconnects, on :disconnect ?
 - mode() for setting nick/channel modes
 - a bunch of IRC commands: ban, names, list, etc.
-- More specs
+- async!
