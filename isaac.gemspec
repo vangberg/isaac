@@ -16,3 +16,4 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--main", "README.rdoc"]
   s.extra_rdoc_files = ["LICENSE", "README.rdoc"]
 end
+
