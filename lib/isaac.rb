@@ -161,18 +161,32 @@ module Isaac
       invoke
     end
 
+  private
+    def message_to_send?
+      !@lock && !@queue.empty?
+    end
+
+    def transfered_after_next_send
+      @transfered + @queue.first.size + 1 # the 1 is for \n
+    end
+
+    def exceed_limit?
+      transfered_after_next_send > 1472
+    end
+
+    def lock_and_ping
+      lock
+      @socket.puts "PING :#{@server}"
+    end
+
     def invoke
-      while !@lock && msg = @queue.shift
-        # <= 1472 allows for \n
-        if (@transfered + msg.size) < 1472
-          @socket.puts msg
-        #  puts ">> #{msg}" if @bot.config.verbose
-          @transfered += msg.size + 1
+      while message_to_send?
+        if exceed_limit?
+          lock_and_ping; break
         else
-          @queue.unshift(msg)
-          lock
-          @socket.puts "PING :#{@server}"
-          break
+          @transfered = transfered_after_next_send
+          @socket.puts @queue.shift
+          # puts ">> #{msg}" if @bot.config.verbose
         end
       end
     end
