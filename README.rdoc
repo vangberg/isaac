@@ -45,6 +45,13 @@ If you want to match private messages use the +on :private+ event:
     msg nick, "Login successful!"
   end
 
+You can also pass the RegExp captures as block arguments:
+    
+  on :channel, /catch this: (.*) and this: (.*)/ do |first, last|
+    # `first` will contain the first regexp capture,
+    # `last` the second.
+  end
+
 === Defining helpers
 Helpers should not be defined in the top level, but instead using the +helpers+-constructor:
 
@@ -66,20 +73,6 @@ Errors, as specified by RFC 1459, can be reacted upon as well. If you e.g. try t
   end
 
 Available variables: +nick+ and +channel+.
-
-=== Send commands from outside an event (not implemented in Shaft atm)
-You might want to send messages, join channels etc. without it strictly being the result of an on()-event, e.g. send a message every time a RSS feed is updated or whatever. You can use +Isaac.execute+ for that, and all your normal commands, +msg+, +join+, +topic+ etc. will be available:
-
-  class K
-    def smoke(brand)
-      Isaac.execute { msg "harryjr", "you should smoke #{brand} cigarettes" }
-    end
-  end
-
-  on :connect do
-    k = K.new
-    k.smoke("Lucky Strike")
-  end
 
 == Contribute
 The source is hosted at GitHub: http://github.com/ichverstehe/isaac

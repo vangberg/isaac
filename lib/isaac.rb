@@ -47,7 +47,11 @@ module Isaac
       if handler = find(event, message)
         regexp, block = *handler
         self.match = message.match(regexp).captures
-        catch(:halt) { instance_eval(&block) }
+
+        mc = class << self; self; end
+        mc.send :define_method, :__isaac_event_handler, &block
+
+        catch(:halt) { send(:__isaac_event_handler, *match) }
       end
     end
 
