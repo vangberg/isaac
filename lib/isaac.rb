@@ -87,16 +87,15 @@ module Isaac
       @bot, @config = bot, config
       @transfered = 0
       @registration = []
-      @lock = false
-      @queue = []
     end
 
     def connect
       @socket = TCPSocket.open(@config.server, @config.port)
+      @queue = Queue.new(@socket, @bot.config.server)
       message "PASS #{@config.password}" if @config.password
       message "NICK #{@config.nick}"
       message "USER #{@config.nick} 0 * :#{@config.realname}"
-      @lock = true
+      @queue.lock
 
       while line = @socket.gets
         parse line
@@ -109,14 +108,13 @@ module Isaac
       when /^:\S+ 00([1-4])/
         @registration << $1.to_i
         if registered?
-          @lock = false
+          @queue.unlock
           @bot.dispatch(:connect)
-          continue_queue
         end
       when /^:(\S+)!\S+ PRIVMSG \S+ :?\001VERSION\001/
         message "NOTICE #{$1} :\001VERSION #{@bot.config.version}\001"
       when /^PING (\S+)/
-        @transfered, @lock = 0, false
+        @queue.unlock
         message "PONG #{$1}"
       when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
         env = { :nick => $1, :userhost => $2, :channel => $3, :message => $4 }
@@ -126,8 +124,7 @@ module Isaac
         env = {:error => $1.to_i, :message => $1, :nick => $2, :channel => $2}
         @bot.dispatch(:error, env)
       when /^:\S+ PONG/
-        @transfered, @lock = 0, false
-        continue_queue
+        @queue.unlock
       end
     end
 
@@ -137,20 +134,44 @@ module Isaac
 
     def message(msg)
       @queue << msg
-      continue_queue
+    end
+  end
+
+  class Queue
+    def initialize(socket, server)
+      # We need  server  for pinging us out of an excess flood
+      @socket, @server = socket, server
+      @queue = []
+      @lock = false
+      @transfered = 0
     end
 
-    def continue_queue
-      # <= 1472 allows for \n
+    def lock
+      @lock = true
+    end
+
+    def unlock
+      @lock = false
+      @transfered = 0
+      invoke
+    end
+
+    def <<(message)
+      @queue << message
+      invoke
+    end
+
+    def invoke
       while !@lock && msg = @queue.shift
+        # <= 1472 allows for \n
         if (@transfered + msg.size) < 1472
           @socket.puts msg
-          puts ">> #{msg}" if @bot.config.verbose
+        #  puts ">> #{msg}" if @bot.config.verbose
           @transfered += msg.size + 1
         else
           @queue.unshift(msg)
-          @lock = true
-          @socket.puts "PING :#{@bot.config.server}"
+          lock
+          @socket.puts "PING :#{@server}"
           break
         end
       end
