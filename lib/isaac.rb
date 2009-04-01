@@ -92,7 +92,7 @@ module Isaac
         when 1; match[0..block.arity-1]
       end
 
-      catch(:halt) { send(:__isaac_event_handler, *bargs) }
+      catch(:halt) { __isaac_event_handler(*bargs) }
     end
   end
 
