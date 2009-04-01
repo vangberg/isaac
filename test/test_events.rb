@@ -52,7 +52,7 @@ class TestEvents < Test::Unit::TestCase
     assert_equal "PRIVMSG foo :bar\n", @server.gets
   end
 
-  test "regular expression matches is handed to block arguments" do
+  test "regular expression matches are handed to block arguments" do
     bot = mock_bot {
       on :channel, /(foo) (bar)/ do |a,b|
         raw "#{a}"
@@ -65,5 +65,18 @@ class TestEvents < Test::Unit::TestCase
 
     assert_equal "foo\n", @server.gets
     assert_equal "bar\n", @server.gets
+  end
+
+  test "only specified number of captures are handed to block args" do
+    bot = mock_bot {
+      on :channel, /(foo) (bar)/ do |a|
+        raw "#{a}"
+      end
+    }
+    bot_is_connected
+
+    bot.dispatch(:channel, :message => "foo bar")
+
+    assert_equal "foo\n", @server.gets
   end
 end

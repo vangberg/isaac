@@ -20,10 +20,8 @@ module Isaac
       instance_eval(&b) if block_given?
     end
 
-    def start
-      puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
-      @irc = IRC.new(self, @config)
-      @irc.connect
+    def configure(&b)
+      b.call(@config)
     end
 
     def on(event, match=//, &block)
@@ -33,32 +31,6 @@ module Isaac
 
     def helpers(&b)
       instance_eval(&b)
-    end
-
-    def configure(&b)
-      b.call(@config)
-    end
-
-    def dispatch(event, env={})
-      self.nick, self.userhost, self.channel, self.error =
-        env[:nick], env[:userhost], env[:channel], env[:error]
-      self.message = env[:message] || ""
-
-      if handler = find(event, message)
-        regexp, block = *handler
-        self.match = message.match(regexp).captures
-
-        mc = class << self; self; end
-        mc.send :define_method, :__isaac_event_handler, &block
-
-        catch(:halt) { send(:__isaac_event_handler, *match) }
-      end
-    end
-
-    def find(type, message)
-      if events = @events[type]
-        events.detect {|regexp,_| message.match(regexp)}
-      end
     end
 
     def halt
@@ -83,6 +55,44 @@ module Isaac
 
     def topic(channel, text)
       raw("TOPIC #{channel} :#{text}")
+    end
+
+    def start
+      puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
+      @irc = IRC.new(self, @config)
+      @irc.connect
+    end
+
+    def dispatch(event, env={})
+      self.nick, self.userhost, self.channel, self.error =
+        env[:nick], env[:userhost], env[:channel], env[:error]
+      self.message = env[:message] || ""
+
+      if handler = find(event, message)
+        regexp, block = *handler
+        self.match = message.match(regexp).captures
+        invoke block
+      end
+    end
+
+  private
+    def find(type, message)
+      if events = @events[type]
+        events.detect {|regexp,_| message.match(regexp)}
+      end
+    end
+
+    def invoke(block)
+      mc = class << self; self; end
+      mc.send :define_method, :__isaac_event_handler, &block
+
+      bargs = case block.arity <=> 0
+        when -1; match
+        when 0; []
+        when 1; match[0..block.arity-1]
+      end
+
+      catch(:halt) { send(:__isaac_event_handler, *bargs) }
     end
   end
 
@@ -145,9 +155,7 @@ module Isaac
     def initialize(socket, server)
       # We need  server  for pinging us out of an excess flood
       @socket, @server = socket, server
-      @queue = []
-      @lock = false
-      @transfered = 0
+      @queue, @lock, @transfered = [], false, 0
     end
 
     def lock
@@ -155,8 +163,7 @@ module Isaac
     end
 
     def unlock
-      @lock = false
-      @transfered = 0
+      @lock, @transfered = false, 0
       invoke
     end
 
