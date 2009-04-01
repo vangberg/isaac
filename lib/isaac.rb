@@ -26,13 +26,13 @@ module Isaac
       @irc.connect
     end
 
-    def on(event, match=//, &b)
+    def on(event, match=//, &block)
       match = match.to_s if match.is_a? Integer
-      (@events[event] ||= []) << [Regexp.new(match), b]
+      (@events[event] ||= []) << [Regexp.new(match), block]
     end
 
     def helpers(&b)
-      instance_eval &b
+      instance_eval(&b)
     end
 
     def configure(&b)
@@ -44,14 +44,16 @@ module Isaac
         env[:nick], env[:userhost], env[:channel], env[:error]
       self.message = env[:message] || ""
 
-      event = @events[event] && @events[event].detect do |regexp,_|
-        message.match(regexp)
-      end
-
-      if event
-        regexp, block = *event
+      if handler = find(event, message)
+        regexp, block = *handler
         self.match = message.match(regexp).captures
         catch(:halt) { instance_eval(&block) }
+      end
+    end
+
+    def find(type, message)
+      if events = @events[type]
+        events.detect {|regexp,_| message.match(regexp)}
       end
     end
 
@@ -59,12 +61,12 @@ module Isaac
       throw :halt
     end
 
-    def raw(m)
-      @irc.message(m)
+    def raw(command)
+      @irc.message(command)
     end
 
-    def msg(recipient, m)
-      raw("PRIVMSG #{recipient} :#{m}")
+    def msg(recipient, text)
+      raw("PRIVMSG #{recipient} :#{text}")
     end
 
     def join(*channels)

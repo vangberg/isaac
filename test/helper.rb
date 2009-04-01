@@ -3,6 +3,7 @@ require 'test/unit'
 require 'contest'
 require 'rr'
 require 'lib/isaac'
+require 'timeout'
 begin
   require 'ruby-debug'
 rescue LoadError; end
@@ -22,7 +23,9 @@ class MockSocket
   end
 
   attr_accessor :in, :out
-  def gets() @in.gets end
+  def gets()
+    Timeout.timeout(1) {@in.gets}
+  end
   def puts(m) @out.puts(m) end
   def eof?() @in.eof? end
   def empty?
