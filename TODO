@@ -2,3 +2,4 @@
 - mode() for setting nick/channel modes
 - a bunch of IRC commands: ban, names, list, etc.
 - async!
+- consider replacing the regexps in #parse with a regular parser
