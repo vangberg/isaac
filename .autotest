@@ -1,0 +1,7 @@
+require 'autotest/redgreen'
+
+Autotest.add_hook :initialize do |at|
+  at.add_mapping(%r|^lib/isaac\.rb$|) do
+    at.files_matching(%r|test/test.*rb|)
+  end
+end
