@@ -9,7 +9,7 @@ class TestEvents < Test::Unit::TestCase
     bot_is_connected
 
     bot.dispatch(:channel, :message => "Hey")
-    assert_equal "PRIVMSG foo :bar baz\n", @server.gets
+    assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
   test "catch-all events" do
@@ -19,7 +19,7 @@ class TestEvents < Test::Unit::TestCase
     bot_is_connected
 
     bot.dispatch(:channel, :message => "lolcat")
-    assert_equal "PRIVMSG foo :bar baz\n", @server.gets
+    assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
   test "event can be halted" do
@@ -38,7 +38,7 @@ class TestEvents < Test::Unit::TestCase
     }
     bot_is_connected
 
-    assert_equal "PRIVMSG foo :bar baz\n", @server.gets
+    assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
   test "regular expression match is accessible" do
@@ -49,7 +49,7 @@ class TestEvents < Test::Unit::TestCase
 
     bot.dispatch(:channel, :message => "foo bar")
 
-    assert_equal "PRIVMSG foo :bar\n", @server.gets
+    assert_equal "PRIVMSG foo :bar\r\n", @server.gets
   end
 
   test "regular expression matches are handed to block arguments" do
@@ -63,8 +63,8 @@ class TestEvents < Test::Unit::TestCase
 
     bot.dispatch(:channel, :message => "foo bar")
 
-    assert_equal "foo\n", @server.gets
-    assert_equal "bar\n", @server.gets
+    assert_equal "foo\r\n", @server.gets
+    assert_equal "bar\r\n", @server.gets
   end
 
   test "only specified number of captures are handed to block args" do
@@ -77,6 +77,6 @@ class TestEvents < Test::Unit::TestCase
 
     bot.dispatch(:channel, :message => "foo bar")
 
-    assert_equal "foo\n", @server.gets
+    assert_equal "foo\r\n", @server.gets
   end
 end

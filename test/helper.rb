@@ -27,7 +27,7 @@ class MockSocket
     Timeout.timeout(1) {@in.gets}
   end
   def puts(m) @out.puts(m) end
-  def print(m) @out.write(m) end
+  def print(m) @out.print(m) end
   def eof?() @in.eof? end
   def empty?
     begin
@@ -52,8 +52,8 @@ class Test::Unit::TestCase
   end
 
   def bot_is_connected
-    assert_equal "NICK isaac\n", @server.gets
-    assert_equal "USER isaac 0 * :Isaac\n", @server.gets
-    1.upto(4) {|i| @server.puts ":localhost 00#{i}"}
+    assert_equal "NICK isaac\r\n", @server.gets
+    assert_equal "USER isaac 0 * :Isaac\r\n", @server.gets
+    1.upto(4) {|i| @server.print ":localhost 00#{i}\r\n"}
   end
 end

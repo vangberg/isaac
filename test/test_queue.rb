@@ -21,7 +21,7 @@ class TestQueue < Test::Unit::TestCase
 
     bot.dispatch :connect
     16.times { @server.gets }
-    assert_equal "PING :#{bot.config.server}\n", @server.gets
+    assert_equal "PING :#{bot.config.server}\r\n", @server.gets
     assert @server.empty?
   end
 
@@ -33,7 +33,7 @@ class TestQueue < Test::Unit::TestCase
     @server.gets # PING message
 
     @server.puts ":localhost PONG :localhost"
-    assert_equal "this should not flood!\n", @server.gets
+    assert_equal "this should not flood!\r\n", @server.gets
   end
 
   test "reset transfer amount at server ping" do
@@ -44,6 +44,6 @@ class TestQueue < Test::Unit::TestCase
     @server.gets # PING message triggered by transfer lock
     @server.puts "PING :localhost"
 
-    assert_equal "this should not flood!\n", @server.gets
+    assert_equal "this should not flood!\r\n", @server.gets
   end
 end

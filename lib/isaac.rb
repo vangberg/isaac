@@ -178,7 +178,7 @@ module Isaac
     end
 
     def transfered_after_next_send
-      @transfered + @queue.first.size + 1 # the 1 is for \n
+      @transfered + @queue.first.size + 2 # the 2 is for \r\n
     end
 
     def exceed_limit?
@@ -187,7 +187,11 @@ module Isaac
 
     def lock_and_ping
       lock
-      @socket.puts "PING :#{@server}"
+      @socket.print "PING :#{@server}\r\n"
+    end
+
+    def next_message
+      @queue.shift.to_s.chomp + "\r\n"
     end
 
     def invoke
@@ -196,7 +200,7 @@ module Isaac
           lock_and_ping; break
         else
           @transfered = transfered_after_next_send
-          @socket.puts @queue.shift
+          @socket.print next_message
           # puts ">> #{msg}" if @bot.config.verbose
         end
       end
