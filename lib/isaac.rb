@@ -119,25 +119,25 @@ module Isaac
     def parse(input)
       puts "<< #{input}" if @bot.config.verbose
       case input.chomp
-      when /^:\S+ 00([1-4])/
-        @registration << $1.to_i
+      when /(^:\S+ )?00([1-4])/
+        @registration << $2.to_i
         if registered?
           @queue.unlock
           @bot.dispatch(:connect)
         end
-      when /^:(\S+)!\S+ PRIVMSG \S+ :?\001VERSION\001/
-        message "NOTICE #{$1} :\001VERSION #{@bot.config.version}\001"
+      when /(^:(\S+)!\S+ )?PRIVMSG \S+ :?\001VERSION\001/
+        message "NOTICE #{$2} :\001VERSION #{@bot.config.version}\001"
       when /^PING (\S+)/
         @queue.unlock
         message "PONG #{$1}"
-      when /^:(\S+)!(\S+) PRIVMSG (\S+) :?(.*)/
-        env = { :nick => $1, :userhost => $2, :channel => $3, :message => $4 }
+      when /(^:(\S+)!(\S+) )?PRIVMSG (\S+) :?(.*)/
+        env = { :nick => $2, :userhost => $3, :channel => $4, :message => $5 }
         type = env[:channel].match(/^#/) ? :channel : :private
         @bot.dispatch(type, env)
-      when /^:\S+ ([4-5]\d\d) \S+ (\S+)/
-        env = {:error => $1.to_i, :message => $1, :nick => $2, :channel => $2}
+      when /(^:\S+ )?([4-5]\d\d) \S+ (\S+)/
+        env = {:error => $2.to_i, :message => $2, :nick => $3, :channel => $3}
         @bot.dispatch(:error, env)
-      when /^:\S+ PONG/
+      when /(^:\S+ )?PONG/
         @queue.unlock
       end
     end

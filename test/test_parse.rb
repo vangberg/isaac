@@ -29,6 +29,16 @@ class TestParse < Test::Unit::TestCase
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
+  test "prefix is optional" do
+    bot = mock_bot {
+      on(:channel, //) {msg "foo", "bar baz"}
+    }
+    bot_is_connected
+
+    @server.print "PRIVMSG #awesome :hello, folks!\r\n"
+    assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
+  end
+
   test "private event has environment" do
     bot = mock_bot {
       on :private, // do
@@ -77,6 +87,18 @@ class TestParse < Test::Unit::TestCase
     assert_equal "401\r\n", @server.gets
     assert_equal "jeff\r\n", @server.gets
     assert_equal "jeff\r\n", @server.gets
+  end
+  
+  test "prefix is optional for errors" do
+    bot = mock_bot {
+      on(:error, 401) {
+        raw error
+      }
+    }
+    bot_is_connected
+
+    @server.print "401 isaac jeff :No such nick/channel\r\n"
+    assert_equal "401\r\n", @server.gets
   end
 
   test "ctcp version request are answered" do
