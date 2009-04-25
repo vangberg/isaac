@@ -57,6 +57,11 @@ module Isaac
       raw("TOPIC #{channel} :#{text}")
     end
 
+    def quit(message=nil)
+      command = message ? "QUIT :#{message}" : "QUIT"
+      raw command
+    end
+
     def start
       puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
       @irc = IRC.new(self, @config)

@@ -42,4 +42,20 @@ class TestCommands < Test::Unit::TestCase
     bot.topic "#foo", "bar baz"
     assert_equal "TOPIC #foo :bar baz\r\n", @server.gets
   end
+
+  test "quits" do
+    bot = mock_bot {}
+    bot_is_connected
+
+    bot.quit
+    assert_equal "QUIT\r\n", @server.gets
+  end
+
+  test "quits with message" do
+    bot = mock_bot {}
+    bot_is_connected
+
+    bot.quit "I'm outta here!"
+    assert_equal "QUIT :I'm outta here!\r\n", @server.gets
+  end
 end
