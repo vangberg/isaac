@@ -1,0 +1,33 @@
+= 0.2.5 / 2009-04-25
+
+  * Comply to the RFC - lines end with \r\n, not just \n.
+
+= 0.2.4 / 2009-04-01
+
+  * Bug fixes.
+
+= 0.2.3 / 2009-04-01
+
+  * Pass regular expression groups to block parameters.
+
+  * Internal refactoring of queue and tests.
+
+= 0.2.2 / 2009-02-23
+
+  * Irrelevant.
+
+= 0.2.1 / 2009-02-23
+
+  * config() has been renamed to configure().
+
+  * part() and topic() commands added.
+
+  * Comply to the RFC and wait for 001-004 messages until sending commands.
+
+  * Respond to CTCP action with the content of configure {|c| c.version = "" }.
+
+  * Improved documentation.
+
+= 0.2.0 / 2009-02-23
+
+  * This is a complete rewrite of Isaac.
