@@ -3,7 +3,7 @@ require 'socket'
 module Isaac
   VERSION = '0.2.1'
 
-  Config = Struct.new(:server, :port, :password, :nick, :realname, :version, :environment, :verbose)
+  Config = Struct.new(:server, :port, :password, :nick, :realname, :version, :environment, :verbose, :reload)
 
   def self.bot
     @bot ||= Bot.new
@@ -15,12 +15,13 @@ module Isaac
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, nil, "isaac", "Isaac", 'isaac', :production, false)
+      @config = Config.new("localhost", 6667, nil, "isaac", "Isaac", 'isaac', :production, false, false)
 
       instance_eval(&b) if block_given?
     end
 
     def configure(&b)
+      return if reloading?
       b.call(@config)
     end
 
@@ -73,6 +74,8 @@ module Isaac
         env[:nick], env[:userhost], env[:channel], env[:error]
       self.message = env[:message] || ""
 
+      reload! if @config.reload
+
       if handler = find(event, message)
         regexp, block = *handler
         self.match = message.match(regexp).captures
@@ -80,7 +83,18 @@ module Isaac
       end
     end
 
+    def reloading?
+      @reloading
+    end
+
   private
+    def reload!
+      @reloading = true
+      @events = {}
+      load $0
+      @reloading = false
+    end
+
     def find(type, message)
       if events = @events[type]
         events.detect {|regexp,_| message.match(regexp)}
@@ -224,6 +238,6 @@ end
 at_exit do
   unless defined?(Test::Unit)
     raise $! if $!
-    Isaac.bot.start
+    Isaac.bot.start unless Isaac.bot.reloading?
   end
 end
