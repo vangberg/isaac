@@ -45,6 +45,10 @@ module Isaac
       raw("PRIVMSG #{recipient} :#{text}")
     end
 
+    def action(recipient, text)
+      raw("PRIVMSG #{recipient} :\001ACTION #{text}\001")
+    end
+
     def join(*channels)
       channels.each {|channel| raw("JOIN #{channel}")}
     end
@@ -55,6 +59,10 @@ module Isaac
 
     def topic(channel, text)
       raw("TOPIC #{channel} :#{text}")
+    end
+
+    def kick(channel, user, reason=nil)
+      raw("KICK #{channel} #{user} :#{reason}")
     end
 
     def quit(message=nil)

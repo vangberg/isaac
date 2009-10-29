@@ -17,6 +17,14 @@ class TestCommands < Test::Unit::TestCase
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
+  test "actions are sent to recipient" do
+    bot = mock_bot {}
+    bot_is_connected
+
+    bot.action "foo", "bar"
+    assert_equal "PRIVMSG foo :\001ACTION bar\011"
+  end
+
   test "channels are joined" do
     bot = mock_bot {}
     bot_is_connected
@@ -41,6 +49,14 @@ class TestCommands < Test::Unit::TestCase
 
     bot.topic "#foo", "bar baz"
     assert_equal "TOPIC #foo :bar baz\r\n", @server.gets
+  end
+
+  test "can kick users" do
+    bot = mock_bot {}
+    bot_is_connected
+
+    bot.kick "foo", "bar", "bein' a baz"
+    assert_equal "KICK foo bar :bein' a baz"
   end
 
   test "quits" do
