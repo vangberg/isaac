@@ -22,7 +22,7 @@ class TestCommands < Test::Unit::TestCase
     bot_is_connected
 
     bot.action "foo", "bar"
-    assert_equal "PRIVMSG foo :\001ACTION bar\011"
+    assert_equal "PRIVMSG foo :\001ACTION bar\011\r\n", @server.gets
   end
 
   test "channels are joined" do
@@ -51,12 +51,20 @@ class TestCommands < Test::Unit::TestCase
     assert_equal "TOPIC #foo :bar baz\r\n", @server.gets
   end
 
+  test "modes can be set" do
+    bot = mock_bot {}
+    bot_is_connected
+
+    bot.mode "#foo", "+o"
+    assert_equal "MODE #foo +o\r\n", @server.gets
+  end
+
   test "can kick users" do
     bot = mock_bot {}
     bot_is_connected
 
     bot.kick "foo", "bar", "bein' a baz"
-    assert_equal "KICK foo bar :bein' a baz"
+    assert_equal "KICK foo bar :bein' a baz\r\n", @server.gets
   end
 
   test "quits" do

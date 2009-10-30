@@ -60,6 +60,10 @@ module Isaac
       raw("TOPIC #{channel} :#{text}")
     end
 
+    def mode(channel, option)
+      raw("MODE #{channel} #{option}")
+    end
+
     def kick(channel, user, reason=nil)
       raw("KICK #{channel} #{user} :#{reason}")
     end
