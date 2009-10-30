@@ -10,8 +10,7 @@ module Isaac
   end
 
   class Bot
-    attr_accessor :config, :irc, :nick, :channel, :message, :userhost, :match,
-      :error
+    attr_accessor :config, :irc, :nick, :channel, :message, :userhost, :match, :error
 
     def initialize(&b)
       @events = {}
