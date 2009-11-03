@@ -1,3 +1,7 @@
+= master / unreleasedd
+
+  * Add action(), kick() and mode() [Danny Tatom]
+
 = 0.2.5 / 2009-04-25
 
   * Comply to the RFC - lines end with \r\n, not just \n.
