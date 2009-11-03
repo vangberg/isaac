@@ -22,7 +22,7 @@ class TestCommands < Test::Unit::TestCase
     bot_is_connected
 
     bot.action "foo", "bar"
-    assert_equal "PRIVMSG foo :\001ACTION bar\011\r\n", @server.gets
+    assert_equal "PRIVMSG foo :\001ACTION bar\001\r\n", @server.gets
   end
 
   test "channels are joined" do
