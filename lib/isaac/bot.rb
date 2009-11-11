@@ -5,10 +5,6 @@ module Isaac
 
   Config = Struct.new(:server, :port, :password, :nick, :realname, :version, :environment, :verbose)
 
-  def self.bot
-    @bot ||= Bot.new
-  end
-
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :userhost, :match,
       :error

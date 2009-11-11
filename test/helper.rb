@@ -1,8 +1,9 @@
+$LOAD_PATH.unshift 'lib'
+require 'isaac'
 require 'rubygems'
 require 'test/unit'
 require 'contest'
 require 'rr'
-require 'lib/isaac'
 require 'timeout'
 begin
   require 'ruby-debug'

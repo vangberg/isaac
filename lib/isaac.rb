@@ -1,9 +1,11 @@
-require 'issac/issac.rb'
+require 'isaac/bot'
+
+$bot = Isaac::Bot.new
 
 %w(configure helpers on).each do |method|
   eval(<<-EOF)
     def #{method}(*args, &block)
-      Isaac.bot.#{method}(*args, &block)
+      $bot.#{method}(*args, &block)
     end
   EOF
 end
@@ -11,6 +13,6 @@ end
 at_exit do
   unless defined?(Test::Unit)
     raise $! if $!
-    Isaac.bot.start
+    $bot.start
   end
 end

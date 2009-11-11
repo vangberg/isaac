@@ -1,4 +1,6 @@
-require '../lib/isaac.rb'
+$LOAD_PATH.unshift '../lib'
+
+require 'isaac'
 
 configure do |c|
   c.nick    = "echo_bot"
@@ -8,7 +10,7 @@ configure do |c|
 end
 
 on :connect do
-  join "#Awesome_Channel"
+  join "#awesome_channel"
 end
 
 on :channel, // do

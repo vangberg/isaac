@@ -1,5 +1,7 @@
 = master / unreleasedd
 
+  * Require 'isaac/bot' to avoid top level bot/methods [Julian Langschaedel]
+
   * Add action(), kick() and mode() [Danny Tatom]
 
 = 0.2.5 / 2009-04-25
