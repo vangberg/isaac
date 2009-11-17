@@ -13,10 +13,6 @@ An Isaac-bot needs a few basics:
     c.server  = "irc.freenode.net"
     c.port    = 6667
   end
-or:
-  require 'isaac/isaac'
-  Isaac.bot.configure &block
-  Isaac.bot.on &block
 That's it. Run <tt>ruby bot.rb</tt> and it will connect to the specified server.
 
 === Connecting
@@ -78,6 +74,25 @@ Errors, as specified by RFC 1459, can be reacted upon as well. If you e.g. try t
 
 Available variables: +nick+ and +channel+.
 
+=== Non-top level bots
+You might not want to pollute the top-level namespace with Isaac
+helpers, or you want to define multiple bots. This can be done
+easily, by requiring `isaac/bot` instead of `isaac`:
+
+  require 'isaac/bot'
+
+  bot = Isaac::Bot.new do
+    configure do
+      …
+    end
+
+    on :channel do
+      …
+    end
+  end
+
+  bot.start
+  
 == Contribute
 The source is hosted at GitHub: http://github.com/ichverstehe/isaac
 
