@@ -13,7 +13,8 @@ Gem::Specification.new do |s|
     "README.rdoc", 
     "CHANGES",
 		"isaac.gemspec", 
-		"lib/isaac.rb"
+		"lib/isaac.rb",
+    "lib/isaac/bot.rb"
   ]
   s.rdoc_options = ["--main", "README.rdoc"]
   s.extra_rdoc_files = ["CHANGES", "README.rdoc"]
