@@ -9,10 +9,12 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "isaac"
   s.has_rdoc = true
   s.authors  = ["Harry Vangberg"]
-  s.files    = ["README.rdoc", 
+  s.files    = [
+    "README.rdoc", 
     "CHANGES",
 		"isaac.gemspec", 
-		"lib/isaac.rb"]
+		"lib/isaac.rb"
+  ]
   s.rdoc_options = ["--main", "README.rdoc"]
   s.extra_rdoc_files = ["CHANGES", "README.rdoc"]
 end
