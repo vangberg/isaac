@@ -29,6 +29,16 @@ class TestParse < Test::Unit::TestCase
     assert_equal "PRIVMSG #foo :johnny left: Leaving\r\n", @server.gets
   end
 
+  test "quit messages dispatches quit events" do
+    bot = mock_bot {
+      on(:quit) {msg "#foo", "#{nick} quit: #{message}"}
+    }
+    bot_is_connected
+
+    @server.print ":johnny!john@doe.com QUIT :Leaving\r\n"
+    assert_equal "PRIVMSG #foo :johnny quit: Leaving\r\n", @server.gets
+  end
+
   test "private messages dispatches private event" do
     bot = mock_bot {
       on(:private, //) {msg "foo", "bar baz"}
