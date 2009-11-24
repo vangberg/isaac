@@ -9,6 +9,26 @@ class TestParse < Test::Unit::TestCase
     assert_equal "PONG :foo.bar\r\n", @server.gets
   end
 
+  test "join messages dispatches join event" do
+    bot = mock_bot {
+      on(:join) {msg channel, "bar baz"}
+    }
+    bot_is_connected
+
+    @server.print ":johnny!john@doe.com JOIN #foo\r\n"
+    assert_equal "PRIVMSG #foo :bar baz\r\n", @server.gets
+  end
+
+  test "part messages dispatches part events" do
+    bot = mock_bot {
+      on(:part) {msg channel, "#{nick} left: #{message}"}
+    }
+    bot_is_connected
+
+    @server.print ":johnny!john@doe.com PART #foo :Leaving\r\n"
+    assert_equal "PRIVMSG #foo :johnny left: Leaving\r\n", @server.gets
+  end
+
   test "private messages dispatches private event" do
     bot = mock_bot {
       on(:private, //) {msg "foo", "bar baz"}
