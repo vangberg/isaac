@@ -138,7 +138,7 @@ module Isaac
         ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
         unless @config.environment == :test
-          puts "Using SSL with #{config.server}:#{config.port}"
+          puts "Using SSL with #{@config.server}:#{@config.port}"
         end
 
         @socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ssl_context)
