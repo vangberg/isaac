@@ -3,7 +3,7 @@ require 'socket'
 module Isaac
   VERSION = '0.2.1'
 
-  Config = Struct.new(:server, :port, :password, :nick, :realname, :version, :environment, :verbose)
+  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose)
 
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
@@ -11,7 +11,7 @@ module Isaac
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, nil, "isaac", "Isaac", 'isaac', :production, false)
+      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false)
 
       instance_eval(&b) if block_given?
     end
@@ -125,7 +125,29 @@ module Isaac
     end
 
     def connect
-      @socket = TCPSocket.open(@config.server, @config.port)
+      tcp_socket = TCPSocket.open(@config.server, @config.port)
+
+      if @config.ssl
+        begin
+          require 'openssl'
+        rescue ::LoadError
+          raise(RuntimeError,"unable to require 'openssl'",caller)
+        end
+
+        ssl_context = OpenSSL::SSL::SSLContext.new
+        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+        unless @config.environment == :test
+          puts "Using SSL with #{config.server}:#{config.port}"
+        end
+
+        @socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ssl_context)
+        @socket.sync = true
+        @socket.connect
+      else
+        @socket = tcp_socket
+      end
+
       @queue = Queue.new(@socket, @bot.config.server)
       message "PASS #{@config.password}" if @config.password
       message "NICK #{@config.nick}"
