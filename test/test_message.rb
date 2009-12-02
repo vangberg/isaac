@@ -1,0 +1,75 @@
+require File.join(File.dirname(__FILE__), 'helper')
+
+class TestMessage < Test::Unit::TestCase
+  include Isaac
+
+  test "host prefix" do
+    msg = Message.new(":jeff!spicoli@beach.com QUIT")
+    assert_equal "jeff!spicoli@beach.com", msg.prefix
+    assert_equal "jeff", msg.nick
+    assert_equal "spicoli", msg.user
+    assert_equal "beach.com", msg.host
+  end
+
+  test "server prefix" do
+    msg = Message.new(":some.server.com PING")
+    assert_equal "some.server.com", msg.prefix
+    assert_equal "some.server.com", msg.server
+  end
+
+  test "without prefix" do
+    msg = Message.new("PING foo.bar")
+    assert_nil msg.prefix
+    assert_nil msg.nick
+    assert_nil msg.host
+  end
+
+  test "command" do
+    msg = Message.new("PING foo.bar")
+    assert_equal :ping, msg.command
+  end
+
+  test "numeric reply" do
+    msg = Message.new("409")
+    assert msg.numeric_reply?
+    assert_equal 409, msg.command
+  end
+
+  test "single param" do
+    msg = Message.new("PING foo.bar")
+    assert_equal 1, msg.params.size
+    assert_equal "foo.bar", msg.params[0]
+  end
+
+  test "multiple params" do
+    msg = Message.new("FOO bar baz")
+    assert_equal 2, msg.params.size
+    assert_equal ["bar", "baz"], msg.params
+  end
+
+  test "single param with whitespace" do
+    msg = Message.new("FOO :bar baz")
+    assert_equal 1, msg.params.size
+    assert_equal "bar baz", msg.params[0]
+  end
+
+  test "single param with whitespace and colon" do
+    msg = Message.new("FOO :bar :baz")
+    assert_equal 1, msg.params.size
+    assert_equal "bar :baz", msg.params[0]
+  end
+  
+  test "multiple params with whitespace" do
+    msg = Message.new("FOO bar :lol cat")
+    assert_equal 2, msg.params.size
+    assert_equal "bar", msg.params[0]
+    assert_equal "lol cat", msg.params[1]
+  end
+
+  test "multiple params with whitespace and colon" do
+    msg = Message.new("FOO bar :lol :cat")
+    assert_equal 2, msg.params.size
+    assert_equal "bar", msg.params[0]
+    assert_equal "lol :cat", msg.params[1]
+  end
+end

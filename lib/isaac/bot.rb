@@ -164,6 +164,63 @@ module Isaac
     end
   end
 
+  class Message
+    attr_accessor :raw, :prefix, :server, :nick, :user, :host, :command, :params
+
+    def initialize(msg=nil)
+      if msg
+        @raw = msg
+        parse
+      end
+    end
+
+    def numeric_reply?
+      @numeric_reply
+    end
+
+    def parse
+      match = @raw.match(/(^:(\S+) )?(\S+)(.*)?/)
+      _, @prefix, @raw_command, @raw_params = match.captures
+
+      parse_prefix
+      parse_command
+      parse_params
+    end
+
+    private
+    def parse_prefix
+      return unless @prefix
+
+      if match = @prefix.match(/(\S+)!(\S+)@(\S+)/)
+        @nick = match[1]
+        @user = match[2]
+        @host = match[3]
+      else 
+        @server = @prefix
+      end
+    end
+
+    def parse_command
+      if @raw_command =~ /^\d\d\d$/
+        @numeric_reply = true
+        @command = @raw_command.to_i
+      else
+        @numeric_reply = false
+        @command = @raw_command.downcase.to_sym
+      end
+    end
+
+    def parse_params
+      @raw_params.strip!
+      if match = @raw_params.match(/:(.*)/)
+        @params = match.pre_match.split(" ")
+        @params << match[1]
+      else
+        @params = @raw_params.split(" ")
+      end
+    end
+  end
+
   class Queue
     def initialize(socket, server)
       # We need  server  for pinging us out of an excess flood
