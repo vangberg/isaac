@@ -202,7 +202,7 @@ module Isaac
     end
 
     def parse
-      match = @raw.match(/(^:(\S+) )?(\S+)(.*)?/)
+      match = @raw.match(/(^:(\S+) )?(\S+)(.*)/)
       _, @prefix, @command, raw_params = match.captures
 
       raw_params.strip!
@@ -233,6 +233,22 @@ module Isaac
       return unless @prefix
       return if @prefix.match(/[@!]/)
       @server ||= @prefix[/^(\S+)/, 1]
+    end
+
+    def error?
+      !!error
+    end
+
+    def error
+      return @error if @error
+      @error = command.to_i if numeric_reply? && command[/[45]\d\d/]
+    end
+
+    def channel
+      return @channel if @channel
+      if command == "PRIVMSG" and params.first.start_with?("#")
+        @channel = params.first
+      end
     end
   end
 

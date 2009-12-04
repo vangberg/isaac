@@ -77,13 +77,23 @@ class TestMessage < Test::Unit::TestCase
     assert_equal "lol :cat", msg.params[1]
   end
 
-  #test "error" do
-    #msg = Message.new("200")
-    #assert_equal false, msg.error?
-    #assert_nil msg.error
+  test "error" do
+    msg = Message.new("200")
+    assert_equal false, msg.error?
+    assert_nil msg.error
 
-    #msg = Message.new("400")
-    #assert_equal true, msg.error?
-    #assert_equal 400, msg.error
-  #end
+    msg = Message.new("400")
+    assert_equal true, msg.error?
+    assert_equal 400, msg.error
+  end
+
+  test "channel has channel name" do
+    msg = Message.new(":foo!bar@baz.com PRIVMSG #awesome :lol cat")
+    assert_equal "#awesome", msg.channel
+  end
+
+  test "channel has nothing when receiver is a nick" do
+    msg = Message.new(":foo!bar@baz.com PRIVMSG john :wazzup boy?")
+    assert_equal nil, msg.channel
+  end
 end
