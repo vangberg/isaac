@@ -76,11 +76,14 @@ module Isaac
       @irc.connect
     end
 
+    def message
+      @message ||= ""
+    end
+
     def dispatch(event, msg=nil)
       if msg
-        @nick, @user, @host, @channel, @error, @message = msg.nick, msg.user, msg.host, msg.channel, msg.error, msg.message
-      else
-        @message = ""
+        @nick, @user, @host, @channel, @error, @message = 
+          msg.nick, msg.user, msg.host, msg.channel, msg.error, msg.message
       end
 
       if handler = find(event, message)
@@ -101,6 +104,9 @@ module Isaac
       mc = class << self; self; end
       mc.send :define_method, :__isaac_event_handler, &block
 
+      # -1  splat arg, send everything
+      #  0  no args, send nothing
+      #  1  defined number of args, send only those
       bargs = case block.arity <=> 0
         when -1; match
         when 0; []
