@@ -43,7 +43,8 @@ class TestParse < Test::Unit::TestCase
     bot = mock_bot {
       on :private, // do
         raw nick
-        raw userhost
+        raw user
+        raw host
         raw message
       end
     }
@@ -51,7 +52,8 @@ class TestParse < Test::Unit::TestCase
 
     @server.puts ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
     assert_equal "johnny\r\n", @server.gets
-    assert_equal "john@doe.com\r\n", @server.gets
+    assert_equal "john\r\n", @server.gets
+    assert_equal "doe.com\r\n", @server.gets
     assert_equal "hello, you!\r\n", @server.gets
   end
 
@@ -59,7 +61,8 @@ class TestParse < Test::Unit::TestCase
     bot = mock_bot {
       on :channel, // do
         raw nick
-        raw userhost
+        raw user
+        raw host
         raw message
         raw channel
       end
@@ -68,7 +71,8 @@ class TestParse < Test::Unit::TestCase
 
     @server.puts ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"
     assert_equal "johnny\r\n", @server.gets
-    assert_equal "john@doe.com\r\n", @server.gets
+    assert_equal "john\r\n", @server.gets
+    assert_equal "doe.com\r\n", @server.gets
     assert_equal "hello, folks!\r\n", @server.gets
     assert_equal "#awesome\r\n", @server.gets
   end
@@ -77,16 +81,12 @@ class TestParse < Test::Unit::TestCase
     bot = mock_bot {
       on(:error, 401) {
         raw error
-        raw nick
-        raw channel
       }
     }
     bot_is_connected
 
     @server.print ":server 401 isaac jeff :No such nick/channel\r\n"
     assert_equal "401\r\n", @server.gets
-    assert_equal "jeff\r\n", @server.gets
-    assert_equal "jeff\r\n", @server.gets
   end
   
   test "prefix is optional for errors" do

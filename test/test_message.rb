@@ -26,13 +26,13 @@ class TestMessage < Test::Unit::TestCase
 
   test "command" do
     msg = Message.new("PING foo.bar")
-    assert_equal :ping, msg.command
+    assert_equal "PING", msg.command
   end
 
   test "numeric reply" do
     msg = Message.new("409")
     assert msg.numeric_reply?
-    assert_equal 409, msg.command
+    assert_equal "409", msg.command
   end
 
   test "single param" do

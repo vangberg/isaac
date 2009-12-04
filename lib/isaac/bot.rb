@@ -6,7 +6,7 @@ module Isaac
   Config = Struct.new(:server, :port, :password, :nick, :realname, :version, :environment, :verbose)
 
   class Bot
-    attr_accessor :config, :irc, :nick, :channel, :message, :userhost, :match,
+    attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
       :error
 
     def initialize(&b)
@@ -77,8 +77,8 @@ module Isaac
     end
 
     def dispatch(event, env={})
-      self.nick, self.userhost, self.channel, self.error =
-        env[:nick], env[:userhost], env[:channel], env[:error]
+      self.nick, self.user, self.host, self.channel, self.error =
+        env[:nick], env[:user], env[:host], env[:channel], env[:error]
       self.message = env[:message] || ""
 
       if handler = find(event, message)
@@ -131,32 +131,46 @@ module Isaac
 
     def parse(input)
       puts "<< #{input}" if @bot.config.verbose
-      case input.chomp
-      when /(^:\S+ )?00([1-4])/
-        @registration << $2.to_i
+      msg = Message.new(input)
+
+      if ("001".."004").include? msg.command
+        @registration << msg.command
         if registered?
           @queue.unlock
           @bot.dispatch(:connect)
         end
-      when /(^:(\S+)!\S+ )?PRIVMSG \S+ :?\001VERSION\001/
-        message "NOTICE #{$2} :\001VERSION #{@bot.config.version}\001"
-      when /^PING (\S+)/
-        @queue.unlock
-        message "PONG #{$1}"
-      when /(^:(\S+)!(\S+) )?PRIVMSG (\S+) :?(.*)/
-        env = { :nick => $2, :userhost => $3, :channel => $4, :message => $5 }
+      elsif msg.command == "PRIVMSG"
+        if msg.params.last == "\001VERSION\001"
+          message "NOTICE #{msg.nick} :\001VERSION #{@bot.config.version}\001"
+        end
+
+        env = {
+          :nick => msg.nick, 
+          :user => msg.user,
+          :host => msg.host,
+          :channel => msg.params.first,
+          :message => msg.params.last
+        }
         type = env[:channel].match(/^#/) ? :channel : :private
         @bot.dispatch(type, env)
-      when /(^:\S+ )?([4-5]\d\d) \S+ (\S+)/
-        env = {:error => $2.to_i, :message => $2, :nick => $3, :channel => $3}
-        @bot.dispatch(:error, env)
-      when /(^:\S+ )?PONG/
+      elsif msg.command == "PING"
         @queue.unlock
+        message "PONG :#{msg.params.first}"
+      elsif msg.command == "PONG"
+        @queue.unlock
+      elsif msg.numeric_reply? && msg.command =~ /^[45]/
+        env = {
+          :error => msg.command.to_i,
+          :message => msg.command,
+          :nick => msg.params.first,
+          :channel => msg.params.first
+        }
+        @bot.dispatch(:error, env)
       end
     end
 
     def registered?
-      ([1,2,3,4] - @registration).empty?
+      (("001".."004").to_a - @registration).empty?
     end
 
     def message(msg)
@@ -180,7 +194,7 @@ module Isaac
 
     def parse
       match = @raw.match(/(^:(\S+) )?(\S+)(.*)?/)
-      _, @prefix, @raw_command, @raw_params = match.captures
+      _, @prefix, @command, @raw_params = match.captures
 
       parse_prefix
       parse_command
@@ -201,12 +215,10 @@ module Isaac
     end
 
     def parse_command
-      if @raw_command =~ /^\d\d\d$/
+      if @command =~ /^\d\d\d$/
         @numeric_reply = true
-        @command = @raw_command.to_i
       else
         @numeric_reply = false
-        @command = @raw_command.downcase.to_sym
       end
     end
 
