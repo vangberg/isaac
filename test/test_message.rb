@@ -9,12 +9,16 @@ class TestMessage < Test::Unit::TestCase
     assert_equal "jeff", msg.nick
     assert_equal "spicoli", msg.user
     assert_equal "beach.com", msg.host
+    assert_nil msg.server
   end
 
   test "server prefix" do
     msg = Message.new(":some.server.com PING")
     assert_equal "some.server.com", msg.prefix
     assert_equal "some.server.com", msg.server
+    assert_nil msg.nick
+    assert_nil msg.user
+    assert_nil msg.host
   end
 
   test "without prefix" do
@@ -72,4 +76,14 @@ class TestMessage < Test::Unit::TestCase
     assert_equal "bar", msg.params[0]
     assert_equal "lol :cat", msg.params[1]
   end
+
+  #test "error" do
+    #msg = Message.new("200")
+    #assert_equal false, msg.error?
+    #assert_nil msg.error
+
+    #msg = Message.new("400")
+    #assert_equal true, msg.error?
+    #assert_equal 400, msg.error
+  #end
 end

@@ -187,53 +187,52 @@ module Isaac
   end
 
   class Message
-    attr_accessor :raw, :prefix, :server, :nick, :user, :host, :command, :params
+    attr_accessor :raw,
+      :prefix, :server, :nick, :user, :host,
+      :command, :error,
+      :params
 
     def initialize(msg=nil)
-      if msg
-        @raw = msg
-        parse
-      end
+      @raw = msg
+      parse if msg
     end
 
     def numeric_reply?
-      @numeric_reply
+      @numeric_reply ||= !!@command.match(/^\d\d\d$/)
     end
 
     def parse
       match = @raw.match(/(^:(\S+) )?(\S+)(.*)?/)
-      _, @prefix, @command, @raw_params = match.captures
+      _, @prefix, @command, raw_params = match.captures
 
-      parse_prefix
-      parse_command
-      parse_params
-    end
-
-    private
-    def parse_prefix
-      return unless @prefix
-
-      if match = @prefix.match(/(\S+)!(\S+)@(\S+)/)
-        @nick = match[1]
-        @user = match[2]
-        @host = match[3]
-      else 
-        @server = @prefix
-      end
-    end
-
-    def parse_command
-      @numeric_reply = !!@command.match(/^\d\d\d$/)
-    end
-
-    def parse_params
-      @raw_params.strip!
-      if match = @raw_params.match(/:(.*)/)
+      raw_params.strip!
+      if match = raw_params.match(/:(.*)/)
         @params = match.pre_match.split(" ")
         @params << match[1]
       else
-        @params = @raw_params.split(" ")
+        @params = raw_params.split(" ")
       end
+    end
+
+    def nick
+      return unless @prefix
+      @nick ||= @prefix[/^(\S+)!/, 1]
+    end
+
+    def user
+      return unless @prefix
+      @user ||= @prefix[/^\S+!(\S+)@/, 1]
+    end
+
+    def host
+      return unless @prefix
+      @host ||= @prefix[/@(\S+)$/, 1]
+    end
+
+    def server
+      return unless @prefix
+      return if @prefix.match(/[@!]/)
+      @server ||= @prefix[/^(\S+)/, 1]
     end
   end
 
