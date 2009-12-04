@@ -140,37 +140,45 @@ module Isaac
           @bot.dispatch(:connect)
         end
       elsif msg.command == "PRIVMSG"
-        if msg.params.last == "\001VERSION\001"
-          message "NOTICE #{msg.nick} :\001VERSION #{@bot.config.version}\001"
-        end
-
-        env = {
-          :nick => msg.nick, 
-          :user => msg.user,
-          :host => msg.host,
-          :channel => msg.params.first,
-          :message => msg.params.last
-        }
-        type = env[:channel].match(/^#/) ? :channel : :private
-        @bot.dispatch(type, env)
+        dispatch_privmsg(msg)
+      elsif msg.numeric_reply? && msg.command =~ /^[45]/
+        dispatch_error
       elsif msg.command == "PING"
         @queue.unlock
         message "PONG :#{msg.params.first}"
       elsif msg.command == "PONG"
         @queue.unlock
-      elsif msg.numeric_reply? && msg.command =~ /^[45]/
-        env = {
-          :error => msg.command.to_i,
-          :message => msg.command,
-          :nick => msg.params.first,
-          :channel => msg.params.first
-        }
-        @bot.dispatch(:error, env)
       end
     end
 
     def registered?
       (("001".."004").to_a - @registration).empty?
+    end
+
+    def dispatch_privmsg(msg)
+      if msg.params.last == "\001VERSION\001"
+        message "NOTICE #{msg.nick} :\001VERSION #{@bot.config.version}\001"
+      end
+
+      env = {
+        :nick => msg.nick, 
+        :user => msg.user,
+        :host => msg.host,
+        :channel => msg.params.first,
+        :message => msg.params.last
+      }
+      type = env[:channel].match(/^#/) ? :channel : :private
+      @bot.dispatch(type, env)
+    end
+
+    def dispatch_error
+      env = {
+        :error => msg.command.to_i,
+        :message => msg.command,
+        :nick => msg.params.first,
+        :channel => msg.params.first
+      }
+      @bot.dispatch(:error, env)
     end
 
     def message(msg)
