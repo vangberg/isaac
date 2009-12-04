@@ -142,7 +142,7 @@ module Isaac
       elsif msg.command == "PRIVMSG"
         dispatch_privmsg(msg)
       elsif msg.numeric_reply? && msg.command =~ /^[45]/
-        dispatch_error
+        dispatch_error(msg)
       elsif msg.command == "PING"
         @queue.unlock
         message "PONG :#{msg.params.first}"
@@ -171,7 +171,7 @@ module Isaac
       @bot.dispatch(type, env)
     end
 
-    def dispatch_error
+    def dispatch_error(msg)
       env = {
         :error => msg.command.to_i,
         :message => msg.command,
@@ -223,11 +223,7 @@ module Isaac
     end
 
     def parse_command
-      if @command =~ /^\d\d\d$/
-        @numeric_reply = true
-      else
-        @numeric_reply = false
-      end
+      @numeric_reply = !!@command.match(/^\d\d\d$/)
     end
 
     def parse_params
