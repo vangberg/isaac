@@ -154,7 +154,7 @@ module Isaac
 
         type = msg.channel? ? :channel : :private
         @bot.dispatch(type, msg)
-      elsif msg.numeric_reply? && msg.command =~ /^[45]/
+      elsif msg.error?
         @bot.dispatch(:error, msg)
       elsif msg.command == "PING"
         @queue.unlock
