@@ -87,13 +87,30 @@ class TestMessage < Test::Unit::TestCase
     assert_equal 400, msg.error
   end
 
+  test "if error, #message has the error code string" do
+    msg = Message.new("400")
+    assert_equal "400", msg.message
+  end
+
   test "channel has channel name" do
     msg = Message.new(":foo!bar@baz.com PRIVMSG #awesome :lol cat")
+    assert_equal true, msg.channel?
     assert_equal "#awesome", msg.channel
   end
 
   test "channel has nothing when receiver is a nick" do
     msg = Message.new(":foo!bar@baz.com PRIVMSG john :wazzup boy?")
+    assert_equal false, msg.channel?
     assert_equal nil, msg.channel
+  end
+
+  test "privmsg has #message" do
+    msg = Message.new(":foo!bar@baz.com PRIVMSG #awesome :lol cat")
+    assert_equal "lol cat", msg.message
+  end
+
+  test "non-privmsg doesn't have #message" do
+    msg = Message.new("PING :foo bar")
+    assert_nil msg.message
   end
 end

@@ -76,10 +76,12 @@ module Isaac
       @irc.connect
     end
 
-    def dispatch(event, env={})
-      self.nick, self.user, self.host, self.channel, self.error =
-        env[:nick], env[:user], env[:host], env[:channel], env[:error]
-      self.message = env[:message] || ""
+    def dispatch(event, msg=nil)
+      if msg
+        @nick, @user, @host, @channel, @error, @message = msg.nick, msg.user, msg.host, msg.channel, msg.error, msg.message
+      else
+        @message = ""
+      end
 
       if handler = find(event, message)
         regexp, block = *handler
@@ -140,9 +142,14 @@ module Isaac
           @bot.dispatch(:connect)
         end
       elsif msg.command == "PRIVMSG"
-        dispatch_privmsg(msg)
+        if msg.params.last == "\001VERSION\001"
+          message "NOTICE #{msg.nick} :\001VERSION #{@bot.config.version}\001"
+        end
+
+        type = msg.channel? ? :channel : :private
+        @bot.dispatch(type, msg)
       elsif msg.numeric_reply? && msg.command =~ /^[45]/
-        dispatch_error(msg)
+        @bot.dispatch(:error, msg)
       elsif msg.command == "PING"
         @queue.unlock
         message "PONG :#{msg.params.first}"
@@ -155,42 +162,13 @@ module Isaac
       (("001".."004").to_a - @registration).empty?
     end
 
-    def dispatch_privmsg(msg)
-      if msg.params.last == "\001VERSION\001"
-        message "NOTICE #{msg.nick} :\001VERSION #{@bot.config.version}\001"
-      end
-
-      env = {
-        :nick => msg.nick, 
-        :user => msg.user,
-        :host => msg.host,
-        :channel => msg.params.first,
-        :message => msg.params.last
-      }
-      type = env[:channel].match(/^#/) ? :channel : :private
-      @bot.dispatch(type, env)
-    end
-
-    def dispatch_error(msg)
-      env = {
-        :error => msg.command.to_i,
-        :message => msg.command,
-        :nick => msg.params.first,
-        :channel => msg.params.first
-      }
-      @bot.dispatch(:error, env)
-    end
-
     def message(msg)
       @queue << msg
     end
   end
 
   class Message
-    attr_accessor :raw,
-      :prefix, :server, :nick, :user, :host,
-      :command, :error,
-      :params
+    attr_accessor :raw, :prefix, :command, :params
 
     def initialize(msg=nil)
       @raw = msg
@@ -244,10 +222,23 @@ module Isaac
       @error = command.to_i if numeric_reply? && command[/[45]\d\d/]
     end
 
+    def channel?
+      !!channel
+    end
+
     def channel
       return @channel if @channel
       if command == "PRIVMSG" and params.first.start_with?("#")
         @channel = params.first
+      end
+    end
+
+    def message
+      return @message if @message
+      if error?
+        @message = error.to_s
+      elsif command == "PRIVMSG"
+        @message = params.last
       end
     end
   end
@@ -308,4 +299,3 @@ module Isaac
     end
   end
 end
-
