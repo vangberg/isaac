@@ -1,4 +1,4 @@
-= master / unreleasedd
+= 0.2.6 / 2009-12-21
 
   * Require 'isaac/bot' to avoid top level bot/methods  [Julian Langschaedel]
 
