@@ -1,8 +1,12 @@
 = master / unreleasedd
 
-  * Require 'isaac/bot' to avoid top level bot/methods [Julian Langschaedel]
+  * Require 'isaac/bot' to avoid top level bot/methods  [Julian Langschaedel]
 
-  * Add action(), kick() and mode() [Danny Tatom]
+  * Add action(), kick() and mode()  [Danny Tatom]
+
+  * SSL support - configure {|c| c.ssl = true}  [postmodern]
+
+  * on :join/:part-events  [postmodern]
 
 = 0.2.5 / 2009-04-25
 
