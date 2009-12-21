@@ -183,6 +183,9 @@ module Isaac
         message "PONG :#{msg.params.first}"
       elsif msg.command == "PONG"
         @queue.unlock
+      else
+        event = msg.command.downcase.to_sym
+        @bot.dispatch(event, msg)
       end
     end
 
@@ -256,7 +259,7 @@ module Isaac
 
     def channel
       return @channel if @channel
-      if command == "PRIVMSG" and params.first.start_with?("#")
+      if regular_command? and params.first.start_with?("#")
         @channel = params.first
       end
     end
@@ -265,9 +268,15 @@ module Isaac
       return @message if @message
       if error?
         @message = error.to_s
-      elsif command == "PRIVMSG"
+      elsif regular_command?
         @message = params.last
       end
+    end
+
+    private
+    # This is a late night hack. Fix.
+    def regular_command?
+      %w(PRIVMSG JOIN PART QUIT).include? command
     end
   end
 
