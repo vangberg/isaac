@@ -207,7 +207,11 @@ module Isaac
     end
 
     def numeric_reply?
-      @numeric_reply ||= !!@command.match(/^\d\d\d$/)
+      !!numeric_reply
+    end
+
+    def numeric_reply
+      @numeric_reply ||= @command.match(/^\d\d\d$/)
     end
 
     def parse
