@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'helper')
+require 'helper'
 
 class TestIrc < Test::Unit::TestCase
   test "a new bot connects to IRC" do

@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'helper')
+require 'helper'
 
 class TestEvents < Test::Unit::TestCase
   # This is stupid, but it's just there to make it easier to transform to the new

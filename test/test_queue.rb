@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'helper')
+require 'helper'
 
 class TestQueue < Test::Unit::TestCase
   def flood_bot
