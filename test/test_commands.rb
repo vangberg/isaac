@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'helper')
+require 'helper'
 
 class TestCommands < Test::Unit::TestCase
   test "raw messages can be send" do

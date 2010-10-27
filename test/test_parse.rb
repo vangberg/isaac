@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'helper')
+require 'helper'
 
 class TestParse < Test::Unit::TestCase
   test "ping-pong" do
