@@ -1,19 +1,45 @@
 require 'socket'
+require 'logger'
 
 module Isaac
-  VERSION = '0.2.1'
+  VERSION = '0.2.7'
 
-  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding)
+  Config = Struct.new(
+     :server, 
+     :port,
+     :ssl,
+     :password,
+     :nick,
+     :realname,
+     :version,
+     :environment,
+     :verbose,
+     :encoding,
+     :logger
+  )
 
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
-      :error
+      :error, :logger
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8")
+      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8", nil)
 
       instance_eval(&b) if block_given?
+    end
+
+    def log(msg, error=false)
+       msg.strip!
+       if self.config.logger.nil?
+          puts msg
+       else
+          if error
+             self.config.logger.error msg
+          else
+             self.config.logger.info msg
+          end
+       end
     end
 
     def configure(&b)
@@ -100,7 +126,7 @@ module Isaac
     end
 
     def start
-      puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
+      log "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
       @irc = IRC.new(self, @config)
       @irc.connect
     end
@@ -153,6 +179,10 @@ module Isaac
       @registration = []
     end
 
+    def log(msg, error=false)
+       @bot.log msg, error
+    end
+
     def connect
       tcp_socket = TCPSocket.open(@config.server, @config.port)
 
@@ -171,7 +201,7 @@ module Isaac
         ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
         unless @config.environment == :test
-          puts "Using SSL with #{@config.server}:#{@config.port}"
+          log "Using SSL with #{@config.server}:#{@config.port}"
         end
 
         @socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ssl_context)
@@ -193,7 +223,7 @@ module Isaac
     end
 
     def parse(input)
-      puts "<< #{input}" if @bot.config.verbose
+      log "<< #{input}" if @bot.config.verbose
       msg = Message.new(input)
 
       if ("001".."004").include? msg.command
@@ -367,7 +397,7 @@ module Isaac
         else
           @transfered = transfered_after_next_send
           @socket.print next_message
-          # puts ">> #{msg}" if @bot.config.verbose
+          # log ">> #{msg}" if @bot.config.verbose
         end
       end
     end
