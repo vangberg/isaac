@@ -96,6 +96,8 @@ easily, by requiring `isaac/bot` instead of `isaac`:
 == Contribute
 The source is hosted at GitHub: http://github.com/ichverstehe/isaac
 
+Testing requires the gems rr and contest.
+
 == License
 Copyright (c) 2009 Harry Vangberg <harry@vangberg.name>
 
