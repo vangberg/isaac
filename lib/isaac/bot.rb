@@ -65,6 +65,35 @@ module Isaac
       raw("KICK #{channel} #{user} :#{reason}")
     end
 
+    # http://tools.ietf.org/html/rfc1459#section-4.2.3.1
+    def ban(channel, mask)
+      raw("MODE #{channel} +b #{mask}") if !mask.nil?
+    end
+
+    def unban(channel, mask)
+      raw("MODE #{channel} -b #{mask}") if !mask.nil?
+    end
+
+    # User   - *!*user@*
+    def ban_user(channel, user)
+      ban(channel, "*!*#{user}@*"
+    end
+
+    # Normal - *!*user@*.domain.net
+    def ban_user_domain(channel, user, domain)
+      ban(channel, "*!*#{user}@*.#{domain}")
+    end
+
+    # Domain - *!*@*.domain.net
+    def ban_domain(channel, domain)
+      ban(channel, "*!*@*.#{domain}"
+    end
+
+    def kickban_user(channel, user, msg=nil)
+       ban_user(channel, user)
+       kick(channel, user, msg)
+    end
+
     def quit(message=nil)
       command = message ? "QUIT :#{message}" : "QUIT"
       raw command
