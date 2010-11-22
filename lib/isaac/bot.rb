@@ -76,7 +76,7 @@ module Isaac
 
     # User   - *!*user@*
     def ban_user(channel, user)
-      ban(channel, "*!*#{user}@*"
+      ban(channel, "*!*#{user}@*")
     end
 
     # Normal - *!*user@*.domain.net
@@ -86,7 +86,7 @@ module Isaac
 
     # Domain - *!*@*.domain.net
     def ban_domain(channel, domain)
-      ban(channel, "*!*@*.#{domain}"
+      ban(channel, "*!*@*.#{domain}")
     end
 
     def kickban_user(channel, user, msg=nil)
