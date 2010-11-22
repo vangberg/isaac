@@ -278,7 +278,7 @@ module Isaac
     end
 
     def parse
-      match = @raw.match(/(^:(\S+) )?(\S+)(.*)/u)
+      match = @raw.match(/(^:(\S+) )?(\S+)(.*)/)
       _, @prefix, @command, raw_params = match.captures
 
       raw_params.strip!
