@@ -3,7 +3,7 @@ require 'socket'
 module Isaac
   VERSION = '0.2.1'
 
-  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding)
+  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding, :bind)
 
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
@@ -125,7 +125,7 @@ module Isaac
     end
 
     def connect
-      tcp_socket = TCPSocket.open(@config.server, @config.port)
+      tcp_socket = TCPSocket.open(@config.server, @config.port, @config.bind.nil? ? nil : @config.bind)
 
       if tcp_socket.respond_to?(:set_encoding)
         tcp_socket.set_encoding(@config.encoding)
