@@ -11,7 +11,7 @@ module Isaac
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8")
+      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8", nil)
 
       instance_eval(&b) if block_given?
     end
@@ -125,7 +125,7 @@ module Isaac
     end
 
     def connect
-      tcp_socket = TCPSocket.open(@config.server, @config.port, @config.bind.nil? ? nil : @config.bind)
+      tcp_socket = TCPSocket.open(@config.server, @config.port, @config.bind ? @config.bind : nil)
 
       if tcp_socket.respond_to?(:set_encoding)
         tcp_socket.set_encoding(@config.encoding)
