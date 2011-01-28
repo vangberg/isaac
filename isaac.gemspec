@@ -12,8 +12,8 @@ Gem::Specification.new do |s|
   s.files    = [
     "README.rdoc", 
     "CHANGES",
-		"isaac.gemspec", 
-		"lib/isaac.rb",
+    "isaac.gemspec", 
+    "lib/isaac.rb",
     "lib/isaac/bot.rb"
   ]
   s.rdoc_options = ["--main", "README.rdoc"]
