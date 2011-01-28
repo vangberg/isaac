@@ -13,6 +13,6 @@ end
 at_exit do
   unless defined?(Test::Unit)
     raise $! if $!
-    $bot.start
+    EventMachine.run {$bot.start}
   end
 end

@@ -1,4 +1,4 @@
-require 'socket'
+require 'eventmachine'
 
 module Isaac
   VERSION = '0.2.1'
@@ -72,8 +72,7 @@ module Isaac
 
     def start
       puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
-      @irc = IRC.new(self, @config)
-      @irc.connect
+      @irc = IRC.connect(self, @config)
     end
 
     def message
@@ -117,48 +116,32 @@ module Isaac
     end
   end
 
-  class IRC
+  class IRC < EventMachine::Connection
+    def self.connect(bot, config)
+      EventMachine.connect(config.server, config.port, self, bot, config)
+    end
+
     def initialize(bot, config)
       @bot, @config = bot, config
       @transfered = 0
       @registration = []
     end
 
-    def connect
-      tcp_socket = TCPSocket.open(@config.server, @config.port)
-
-      if tcp_socket.respond_to?(:set_encoding)
-        tcp_socket.set_encoding(@config.encoding)
-      end
-
-      if @config.ssl
-        begin
-          require 'openssl'
-        rescue ::LoadError
-          raise(RuntimeError,"unable to require 'openssl'",caller)
-        end
-
-        ssl_context = OpenSSL::SSL::SSLContext.new
-        ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE
-
-        unless @config.environment == :test
-          puts "Using SSL with #{@config.server}:#{@config.port}"
-        end
-
-        @socket = OpenSSL::SSL::SSLSocket.new(tcp_socket, ssl_context)
-        @socket.sync = true
-        @socket.connect
-      else
-        @socket = tcp_socket
-      end
-
-      @queue = Queue.new(@socket, @bot.config.server)
+    def post_init
+      @data = ''
+      @queue = Queue.new(self, @bot.config.server)
       message "PASS #{@config.password}" if @config.password
       message "NICK #{@config.nick}"
       message "USER #{@config.nick} 0 * :#{@config.realname}"
       @queue.lock
+    end
 
-      while line = @socket.gets
+    def receive_data(data)
+      @data << data
+      loop do
+        line, rest = @data.split("\n", 2)
+        return unless rest
+        @data = rest
         parse line
       end
     end
@@ -289,9 +272,9 @@ module Isaac
   end
 
   class Queue
-    def initialize(socket, server)
+    def initialize(connection, server)
       # We need  server  for pinging us out of an excess flood
-      @socket, @server = socket, server
+      @connection, @server = connection, server
       @queue, @lock, @transfered = [], false, 0
     end
 
@@ -324,7 +307,7 @@ module Isaac
 
     def lock_and_ping
       lock
-      @socket.print "PING :#{@server}\r\n"
+      @connection.send_data "PING :#{@server}\r\n"
     end
 
     def next_message
@@ -337,7 +320,7 @@ module Isaac
           lock_and_ping; break
         else
           @transfered = transfered_after_next_send
-          @socket.print next_message
+          @connection.send_data next_message
           # puts ">> #{msg}" if @bot.config.verbose
         end
       end
