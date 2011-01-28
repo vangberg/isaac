@@ -4,6 +4,7 @@
 * Wraps parsing of incoming messages and raw IRC commands in simple constructs.
 * Hides all the ugly regular expressions of matching IRC commands. Leaves only the essentials for you to match.
 * Takes care of dull stuff such as replying to PING-messages and avoiding excess flood.
+* Uses EventMachine
 
 == Getting started
 An Isaac-bot needs a few basics:
@@ -91,7 +92,7 @@ easily, by requiring `isaac/bot` instead of `isaac`:
     end
   end
 
-  bot.start
+  EventMachine.run {bot.start}
   
 == Contribute
 The source is hosted at GitHub: http://github.com/ichverstehe/isaac
