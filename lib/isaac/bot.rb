@@ -118,9 +118,11 @@ module Isaac
 
   class IRC < EventMachine::Connection
     def self.connect(bot, config)
-      EventMachine.connect(config.server, config.port, self, bot, config)
+      EventMachine.connect(config.server, config.port, IRCClient, bot, config)
     end
+  end
 
+  module IRCClient
     def initialize(bot, config)
       @bot, @config = bot, config
       @transfered = 0

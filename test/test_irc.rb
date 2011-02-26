@@ -3,7 +3,7 @@ require 'helper'
 class TestIrc < Test::Unit::TestCase
   test "a new bot connects to IRC" do
     bot = mock_bot {}
-
+    react!
     assert_equal "NICK isaac\r\n", @server.gets
     assert_equal "USER isaac 0 * :#{bot.config.realname}\r\n", @server.gets
   end
@@ -12,6 +12,7 @@ class TestIrc < Test::Unit::TestCase
     bot = mock_bot {
       configure {|c| c.password = "foo"}
     }
+    react!
     assert_equal "PASS foo\r\n", @server.gets
   end
 
@@ -19,8 +20,9 @@ class TestIrc < Test::Unit::TestCase
     bot = mock_bot {
       on(:connect) {raw "Connected!"}
     }
+    
     2.times { @server.gets } # NICK / USER
-    bot.dispatch :connect
+    bot.dispatch :connect; react!
 
     assert @server.empty?
   end
@@ -32,7 +34,7 @@ class TestIrc < Test::Unit::TestCase
     2.times { @server.gets } # NICK / USER
     bot.dispatch :connect
 
-    1.upto(4) {|i| @server.puts ":localhost 00#{i}"}
+    1.upto(4) {|i| @server.puts ":localhost 00#{i}"}; react!
     assert_equal "Connected!\r\n", @server.gets
   end
 end

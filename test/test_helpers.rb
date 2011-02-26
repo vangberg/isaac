@@ -8,7 +8,7 @@ class TestHelpers < Test::Unit::TestCase
     }
     bot_is_connected
 
-    bot.irc.parse ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
+    bot.irc.parse ":johnny!john@doe.com PRIVMSG isaac :hello, you!"; react!
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 end

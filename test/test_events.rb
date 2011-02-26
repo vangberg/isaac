@@ -15,7 +15,7 @@ class TestEvents < Test::Unit::TestCase
     }
     bot_is_connected
 
-    dispatch(:channel, :message => "Hey")
+    dispatch(:channel, :message => "Hey"); react!
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
@@ -25,7 +25,7 @@ class TestEvents < Test::Unit::TestCase
     }
     bot_is_connected
 
-    dispatch(:channel, :message => "lolcat")
+    dispatch(:channel, :message => "lolcat"); react!
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
@@ -35,7 +35,7 @@ class TestEvents < Test::Unit::TestCase
     }
     bot_is_connected
 
-    dispatch(:channel, :message => "Hey")
+    dispatch(:channel, :message => "Hey"); react!
     assert @server.empty?
   end
 
@@ -44,7 +44,7 @@ class TestEvents < Test::Unit::TestCase
       on(:connect) {msg "foo", "bar baz"}
     }
     bot_is_connected
-
+    react!
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
@@ -54,7 +54,7 @@ class TestEvents < Test::Unit::TestCase
     }
     bot_is_connected
 
-    dispatch(:channel, :message => "foo bar")
+    dispatch(:channel, :message => "foo bar"); react!
 
     assert_equal "PRIVMSG foo :bar\r\n", @server.gets
   end
@@ -68,7 +68,7 @@ class TestEvents < Test::Unit::TestCase
     }
     bot_is_connected
 
-    dispatch(:channel, :message => "foo bar")
+    dispatch(:channel, :message => "foo bar"); react!
 
     assert_equal "foo\r\n", @server.gets
     assert_equal "bar\r\n", @server.gets
@@ -82,7 +82,7 @@ class TestEvents < Test::Unit::TestCase
     }
     bot_is_connected
 
-    dispatch(:channel, :message => "foo bar")
+    dispatch(:channel, :message => "foo bar"); react!
 
     assert_equal "foo\r\n", @server.gets
   end
