@@ -17,18 +17,18 @@ class TestQueue < Test::Unit::TestCase
 
 
   test "ping after sending 1472 consequent bytes" do
-    bot = flood_bot; react!
+    bot = flood_bot
 
-    bot.dispatch(:connect); react!
+    bot.dispatch(:connect)
     16.times { @server.gets }
     assert_equal "PING :#{bot.config.server}\r\n", @server.gets
     assert @server.empty?
   end
 
   test "reset transfer amount at pong reply" do
-    bot = flood_bot; react!
+    bot = flood_bot
 
-    bot.dispatch :connect; react!
+    bot.dispatch :connect
     16.times { @server.gets }
     @server.gets # PING message
 
@@ -37,9 +37,9 @@ class TestQueue < Test::Unit::TestCase
   end
 
   test "reset transfer amount at server ping" do
-    bot = flood_bot; react!
+    bot = flood_bot
 
-    bot.dispatch :connect; react!
+    bot.dispatch :connect
     16.times { @server.gets }
     @server.gets # PING message triggered by transfer lock
     @server.puts "PING :localhost"; react!

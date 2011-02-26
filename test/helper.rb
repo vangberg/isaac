@@ -93,6 +93,7 @@ class Test::Unit::TestCase
     assert_equal "NICK isaac\r\n", @server.gets
     assert_equal "USER isaac 0 * :Isaac\r\n", @server.gets
     1.upto(4) {|i| @server.print ":localhost 00#{i}\r\n" }
+    react!
   end
   
   def react!
