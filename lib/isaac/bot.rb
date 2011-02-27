@@ -3,7 +3,7 @@ require 'eventmachine'
 module Isaac
   VERSION = '0.2.1'
 
-  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding)
+  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding, :channels)
 
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
@@ -11,7 +11,7 @@ module Isaac
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8")
+      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8", [])
 
       instance_eval(&b) if block_given?
     end
@@ -73,6 +73,7 @@ module Isaac
     def start
       puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
       @irc = IRC.connect(self, @config)
+      on(:connect) { join *@config.channels } unless @config.channels.empty?
     end
 
     def message

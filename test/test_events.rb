@@ -44,7 +44,7 @@ class TestEvents < Test::Unit::TestCase
       on(:connect) {msg "foo", "bar baz"}
     }
     bot_is_connected
-    react!
+
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
@@ -86,4 +86,15 @@ class TestEvents < Test::Unit::TestCase
 
     assert_equal "foo\r\n", @server.gets
   end
+  
+  test "specified channels are joined on connect" do
+    @bot = mock_bot {
+      configure { |c| c.channels = ["#foo", "#bar"] }
+    }
+    bot_is_connected
+
+    assert_equal "JOIN #foo\r\n", @server.gets  
+    assert_equal "JOIN #bar\r\n", @server.gets  
+  end
+  
 end
