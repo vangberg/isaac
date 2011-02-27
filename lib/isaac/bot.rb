@@ -20,6 +20,12 @@ module Isaac
       b.call(@config)
     end
 
+    def configure_from(file)
+      cfgfile = ::File.read(file)
+      cfgfile.sub!(/^__END__\n.*/, '')
+      instance_eval( cfgfile )
+    end
+
     def on(event, match=//, &block)
       match = match.to_s if match.is_a? Integer
       (@events[event] ||= []) << [Regexp.new(match), block]
@@ -71,7 +77,7 @@ module Isaac
     end
 
     def start
-      puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
+      $stdout.puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
       @irc = IRC.connect(self, @config)
     end
 
@@ -149,7 +155,7 @@ module Isaac
     end
 
     def parse(input)
-      puts "<< #{input}" if @bot.config.verbose
+      $stdout.puts "<< #{input}" if @bot.config.verbose
       msg = Message.new(input)
 
       if ("001".."004").include? msg.command
