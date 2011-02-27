@@ -77,7 +77,7 @@ module Isaac
     end
 
     def start
-      puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
+      $stdout.puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
       @irc = IRC.connect(self, @config)
     end
 
@@ -155,7 +155,7 @@ module Isaac
     end
 
     def parse(input)
-      puts "<< #{input}" if @bot.config.verbose
+      $stdout.puts "<< #{input}" if @bot.config.verbose
       msg = Message.new(input)
 
       if ("001".."004").include? msg.command
