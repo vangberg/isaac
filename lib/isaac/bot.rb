@@ -73,7 +73,6 @@ module Isaac
     def start
       puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
       @irc = IRC.connect(self, @config)
-      on(:connect) { join *@config.channels } unless @config.channels.empty?
     end
 
     def message
@@ -158,6 +157,7 @@ module Isaac
         if registered?
           @queue.unlock
           @bot.dispatch(:connect)
+          @bot.join(*@bot.config.channels) unless @bot.config.channels.empty?
         end
       elsif msg.command == "PRIVMSG"
         if msg.params.last == "\001VERSION\001"
