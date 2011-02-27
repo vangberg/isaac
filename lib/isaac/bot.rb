@@ -23,7 +23,7 @@ module Isaac
     def configure_from(file)
       cfgfile = ::File.read(file)
       cfgfile.sub!(/^__END__\n.*/, '')
-      eval "Proc.new {|config| " + cfgfile + "\n}.call(@config)", binding, file
+      instance_eval( cfgfile )
     end
 
     def on(event, match=//, &block)
