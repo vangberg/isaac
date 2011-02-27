@@ -20,6 +20,12 @@ module Isaac
       b.call(@config)
     end
 
+    def configure_from(file)
+      cfgfile = ::File.read(file)
+      cfgfile.sub!(/^__END__\n.*/, '')
+      eval "Proc.new {|config| " + cfgfile + "\n}.call(@config)", binding, file
+    end
+
     def on(event, match=//, &block)
       match = match.to_s if match.is_a? Integer
       (@events[event] ||= []) << [Regexp.new(match), block]
