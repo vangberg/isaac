@@ -1,9 +1,9 @@
 require 'eventmachine'
 
 module Isaac
-  VERSION = '0.2.1'
+  VERSION = '0.3.0'
 
-  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding)
+  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding, :bind)
 
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
@@ -11,7 +11,7 @@ module Isaac
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8")
+      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8", "0.0.0.0")
 
       instance_eval(&b) if block_given?
     end
@@ -118,7 +118,7 @@ module Isaac
 
   class IRC < EventMachine::Connection
     def self.connect(bot, config)
-      EventMachine.connect(config.server, config.port, self, bot, config)
+      EventMachine.bind_connect(config.bind, 0, config.server, config.port, self, bot, config)
     end
 
     def initialize(bot, config)
@@ -128,6 +128,7 @@ module Isaac
     end
 
     def post_init
+      start_tls if @bot.config.ssl
       @data = ''
       @queue = Queue.new(self, @bot.config.server)
       message "PASS #{@config.password}" if @config.password
