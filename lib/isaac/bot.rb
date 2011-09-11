@@ -1,7 +1,7 @@
 require 'eventmachine'
 
 module Isaac
-  VERSION = '0.2.1'
+  VERSION = '0.3.0'
 
   Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding)
 
