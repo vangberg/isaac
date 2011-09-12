@@ -128,6 +128,7 @@ module Isaac
     end
 
     def post_init
+      start_tls if @bot.config.ssl
       @data = ''
       @queue = Queue.new(self, @bot.config.server)
       message "PASS #{@config.password}" if @config.password
