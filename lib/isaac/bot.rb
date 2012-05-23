@@ -6,7 +6,7 @@ module Isaac
   Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding)
 
   class Bot
-    attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
+    attr_accessor :config, :irc, :recipient, :nick, :channel, :message, :user, :host, :match,
       :error
 
     def initialize(&b)
@@ -22,7 +22,13 @@ module Isaac
 
     def on(event, match=//, &block)
       match = match.to_s if match.is_a? Integer
-      (@events[event] ||= []) << [Regexp.new(match), block]
+      if event.is_a? Array
+        event.each {|e|
+          (@events[e] ||= []) << [Regexp.new(match), block]
+        }
+      else
+        (@events[event] ||= []) << [Regexp.new(match), block]
+      end
     end
 
     def helpers(&b)
@@ -79,9 +85,13 @@ module Isaac
       @message ||= ""
     end
 
+    def recipient
+      @channel||@nick
+    end
+
     def dispatch(event, msg=nil)
       if msg
-        @nick, @user, @host, @channel, @error, @message = 
+        @nick, @user, @host, @channel, @error, @message =
           msg.nick, msg.user, msg.host, msg.channel, msg.error, msg.message
       end
 
@@ -163,6 +173,7 @@ module Isaac
 
         type = msg.channel? ? :channel : :private
         @bot.dispatch(type, msg)
+        @bot.dispatch(:any, msg)
       elsif msg.error?
         @bot.dispatch(:error, msg)
       elsif msg.command == "PING"
