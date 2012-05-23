@@ -5,7 +5,7 @@ class TestParse < Test::Unit::TestCase
     bot = mock_bot {}
     bot_is_connected
 
-    @server.print "PING :foo.bar\r\n"
+    @server.print "PING :foo.bar\r\n"; react!
     assert_equal "PONG :foo.bar\r\n", @server.gets
   end
 
@@ -15,7 +15,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":johnny!john@doe.com JOIN #foo\r\n"
+    @server.print ":johnny!john@doe.com JOIN #foo\r\n"; react!
     assert_equal "PRIVMSG #foo :bar baz\r\n", @server.gets
   end
 
@@ -25,7 +25,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":johnny!john@doe.com PART #foo :Leaving\r\n"
+    @server.print ":johnny!john@doe.com PART #foo :Leaving\r\n"; react!
     assert_equal "PRIVMSG #foo :johnny left: Leaving\r\n", @server.gets
   end
 
@@ -35,7 +35,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":johnny!john@doe.com QUIT :Leaving\r\n"
+    @server.print ":johnny!john@doe.com QUIT :Leaving\r\n"; react!
     assert_equal "PRIVMSG #foo :johnny quit: Leaving\r\n", @server.gets
   end
 
@@ -45,7 +45,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":johnny!john@doe.com PRIVMSG isaac :hello, you!\r\n"
+    @server.print ":johnny!john@doe.com PRIVMSG isaac :hello, you!\r\n"; react!
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
@@ -55,7 +55,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!\r\n"
+    @server.print ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!\r\n"; react!
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
@@ -65,7 +65,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print "PRIVMSG #awesome :hello, folks!\r\n"
+    @server.print "PRIVMSG #awesome :hello, folks!\r\n"; react!
     assert_equal "PRIVMSG foo :bar baz\r\n", @server.gets
   end
 
@@ -80,7 +80,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.puts ":johnny!john@doe.com PRIVMSG isaac :hello, you!"
+    @server.puts ":johnny!john@doe.com PRIVMSG isaac :hello, you!"; react!
     assert_equal "johnny\r\n", @server.gets
     assert_equal "john\r\n", @server.gets
     assert_equal "doe.com\r\n", @server.gets
@@ -99,7 +99,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.puts ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"
+    @server.puts ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!"; react!
     assert_equal "johnny\r\n", @server.gets
     assert_equal "john\r\n", @server.gets
     assert_equal "doe.com\r\n", @server.gets
@@ -115,7 +115,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":server 401 isaac jeff :No such nick/channel\r\n"
+    @server.print ":server 401 isaac jeff :No such nick/channel\r\n"; react!
     assert_equal "401\r\n", @server.gets
   end
   
@@ -127,7 +127,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print "401 isaac jeff :No such nick/channel\r\n"
+    @server.print "401 isaac jeff :No such nick/channel\r\n"; react!
     assert_equal "401\r\n", @server.gets
   end
 
@@ -137,7 +137,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":jeff!spicoli@name.com PRIVMSG isaac :\001VERSION\001\r\n"
+    @server.print ":jeff!spicoli@name.com PRIVMSG isaac :\001VERSION\001\r\n"; react!
     assert_equal "NOTICE jeff :\001VERSION Ridgemont 0.1\001\r\n", @server.gets
   end
 
@@ -147,7 +147,7 @@ class TestParse < Test::Unit::TestCase
     }
     bot_is_connected
 
-    @server.print ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!\r\n"
+    @server.print ":johnny!john@doe.com PRIVMSG #awesome :hello, folks!\r\n"; react!
     assert_equal "PRIVMSG foo :hello, folks! he said\r\n", @server.gets
   end
 end

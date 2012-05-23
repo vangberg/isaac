@@ -86,4 +86,5 @@ class TestEvents < Test::Unit::TestCase
 
     assert_equal "foo\r\n", @server.gets
   end
+  
 end

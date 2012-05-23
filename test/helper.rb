@@ -1,5 +1,5 @@
 $LOAD_PATH.unshift 'lib'
-require 'isaac'
+require 'isaac/bot'
 require 'rubygems'
 require 'test/unit'
 require 'contest'
@@ -8,12 +8,6 @@ require 'timeout'
 begin
   require 'ruby-debug'
 rescue LoadError; end
-
-module Test::Unit::Assertions
-  def assert_empty_buffer(io)
-    assert_raise(Errno::EAGAIN) { io.read_nonblock 1 }
-  end
-end
 
 class MockSocket
   def self.pipe
@@ -40,21 +34,72 @@ class MockSocket
   end
 end
 
+
+class FakeReactor
+  
+  def poll(io, &blk)
+    (@polls ||= {})[io] = lambda {
+      blk.call(io.read_nonblock(1))
+    }
+  end
+ 
+  def react!
+    @polls.each do |_, proc|
+      loop do
+        begin 
+          proc.call 
+        rescue Errno::EAGAIN
+          break
+        end
+      end
+    end    
+  end
+  
+end
+
+
+class StubIRCClient
+  include Isaac::IRCClient
+  
+  attr_accessor :socket
+  
+  def send_data data
+    @socket.print data
+  end
+   
+end
+
+
 class Test::Unit::TestCase
   include RR::Adapters::TestUnit
 
-  def mock_bot(&b)
+  def mock_bot(bot=nil, &b)
     @socket, @server = MockSocket.pipe
-    stub(TCPSocket).open(anything, anything) {@socket}
-    bot = Isaac::Bot.new(&b)
+    bot ||= Isaac::Bot.new(&b)
+    @r = FakeReactor.new
+    stub(Isaac::IRC).connect(anything, anything) do
+      conn = StubIRCClient.new(bot, bot.config)
+      conn.socket = @socket
+      conn.post_init
+      @r.poll(@socket.in) { |data| conn.receive_data data }
+      conn
+    end
     bot.config.environment = :test
-    Thread.start { bot.start }
+    bot.start
     bot
   end
 
   def bot_is_connected
     assert_equal "NICK isaac\r\n", @server.gets
     assert_equal "USER isaac 0 * :Isaac\r\n", @server.gets
-    1.upto(4) {|i| @server.print ":localhost 00#{i}\r\n"}
+    1.upto(4) {|i| @server.print ":localhost 00#{i}\r\n" }
+    react!
   end
+  
+  def react!
+    @r.react!
+  end
+  
 end
+
+

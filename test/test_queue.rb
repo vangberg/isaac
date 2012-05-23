@@ -19,7 +19,7 @@ class TestQueue < Test::Unit::TestCase
   test "ping after sending 1472 consequent bytes" do
     bot = flood_bot
 
-    bot.dispatch :connect
+    bot.dispatch(:connect)
     16.times { @server.gets }
     assert_equal "PING :#{bot.config.server}\r\n", @server.gets
     assert @server.empty?
@@ -32,7 +32,7 @@ class TestQueue < Test::Unit::TestCase
     16.times { @server.gets }
     @server.gets # PING message
 
-    @server.puts ":localhost PONG :localhost"
+    @server.puts ":localhost PONG :localhost"; react!
     assert_equal "this should not flood!\r\n", @server.gets
   end
 
@@ -42,7 +42,7 @@ class TestQueue < Test::Unit::TestCase
     bot.dispatch :connect
     16.times { @server.gets }
     @server.gets # PING message triggered by transfer lock
-    @server.puts "PING :localhost"
+    @server.puts "PING :localhost"; react!
 
     assert_equal "this should not flood!\r\n", @server.gets
   end

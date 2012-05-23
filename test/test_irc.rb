@@ -12,6 +12,7 @@ class TestIrc < Test::Unit::TestCase
     bot = mock_bot {
       configure {|c| c.password = "foo"}
     }
+
     assert_equal "PASS foo\r\n", @server.gets
   end
 
@@ -19,6 +20,7 @@ class TestIrc < Test::Unit::TestCase
     bot = mock_bot {
       on(:connect) {raw "Connected!"}
     }
+    
     2.times { @server.gets } # NICK / USER
     bot.dispatch :connect
 
@@ -32,7 +34,7 @@ class TestIrc < Test::Unit::TestCase
     2.times { @server.gets } # NICK / USER
     bot.dispatch :connect
 
-    1.upto(4) {|i| @server.puts ":localhost 00#{i}"}
+    1.upto(4) {|i| @server.puts ":localhost 00#{i}"}; react!
     assert_equal "Connected!\r\n", @server.gets
   end
 end

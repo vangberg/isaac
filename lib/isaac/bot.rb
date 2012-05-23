@@ -3,7 +3,7 @@ require 'eventmachine'
 module Isaac
   VERSION = '0.2.1'
 
-  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding)
+  Config = Struct.new(:server, :port, :ssl, :password, :nick, :realname, :version, :environment, :verbose, :encoding, :channels)
 
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
@@ -11,13 +11,19 @@ module Isaac
 
     def initialize(&b)
       @events = {}
-      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8")
+      @config = Config.new("localhost", 6667, false, nil, "isaac", "Isaac", 'isaac', :production, false, "utf-8", [])
 
       instance_eval(&b) if block_given?
     end
 
     def configure(&b)
       b.call(@config)
+    end
+
+    def configure_from(file)
+      cfgfile = ::File.read(file)
+      cfgfile.sub!(/^__END__\n.*/, '')
+      instance_eval( cfgfile )
     end
 
     def on(event, match=//, &block)
@@ -71,7 +77,7 @@ module Isaac
     end
 
     def start
-      puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
+      $stdout.puts "Connecting to #{@config.server}:#{@config.port}" unless @config.environment == :test
       @irc = IRC.connect(self, @config)
     end
 
@@ -118,9 +124,11 @@ module Isaac
 
   class IRC < EventMachine::Connection
     def self.connect(bot, config)
-      EventMachine.connect(config.server, config.port, self, bot, config)
+      EventMachine.connect(config.server, config.port, IRCClient, bot, config)
     end
+  end
 
+  module IRCClient
     def initialize(bot, config)
       @bot, @config = bot, config
       @transfered = 0
@@ -147,7 +155,7 @@ module Isaac
     end
 
     def parse(input)
-      puts "<< #{input}" if @bot.config.verbose
+      $stdout.puts "<< #{input}" if @bot.config.verbose
       msg = Message.new(input)
 
       if ("001".."004").include? msg.command
@@ -155,6 +163,7 @@ module Isaac
         if registered?
           @queue.unlock
           @bot.dispatch(:connect)
+          @bot.join(*@bot.config.channels) unless @bot.config.channels.empty?
         end
       elsif msg.command == "PRIVMSG"
         if msg.params.last == "\001VERSION\001"
