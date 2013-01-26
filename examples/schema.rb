@@ -1,6 +1,6 @@
 require 'lib/isaac'
 
-config do |c|
+configure do |c|
   c.nick    = "SomeBot"
   c.server  = "irc.freenode.net"
   c.port    = 6667
