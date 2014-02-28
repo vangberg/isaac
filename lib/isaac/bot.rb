@@ -7,7 +7,7 @@ module Isaac
 
   class Bot
     attr_accessor :config, :irc, :nick, :channel, :message, :user, :host, :match,
-      :error
+      :error, :invite
 
     def initialize(&b)
       @events = {}
@@ -170,6 +170,8 @@ module Isaac
         message "PONG :#{msg.params.first}"
       elsif msg.command == "PONG"
         @queue.unlock
+      elsif msg.command == "INVITE"
+        @bot.dispatch(:invite, msg)
       else
         event = msg.command.downcase.to_sym
         @bot.dispatch(event, msg)
@@ -267,7 +269,7 @@ module Isaac
     private
     # This is a late night hack. Fix.
     def regular_command?
-      %w(PRIVMSG JOIN PART QUIT).include? command
+      %w(INVITE PRIVMSG JOIN PART QUIT).include? command
     end
   end
 
